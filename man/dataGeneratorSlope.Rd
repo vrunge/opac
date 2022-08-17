@@ -4,7 +4,7 @@
 \alias{dataGeneratorSlope}
 \title{dataGeneratorSlope}
 \usage{
-dataGeneratorSlope(chpts, kinks, varNoise = 0)
+dataGeneratorSlope(chpts = c(1, 100), kinks = c(1, 5), varNoise = 0.1)
 }
 \arguments{
 \item{chpts}{a vector of increasing changepoint indices}
@@ -20,5 +20,5 @@ a vector of (univariate) simulated data following the (chpts, kinks) 2D data-poi
 Generate data with a given continuous piecewise linear model
 }
 \examples{
-myData <- dataGeneratorSlope(c(1,30,100,150), c(-2,pi,0.001,2.1), 0.1)
+myData <- dataGeneratorSlope(chpts = c(1,30,100,150), kinks = c(-2,pi,0.001,2.1), varNoise = 0.1)
 }

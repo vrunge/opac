@@ -5,15 +5,15 @@
 \title{dataGenerator2D}
 \usage{
 dataGenerator2D(
-  chpts = c(50, 100),
-  means1 = c(0, 5),
-  means2 = c(3, 0),
+  chpts = 100,
+  means1 = 0,
+  means2 = 0,
   sdNoise1 = 1,
   sdNoise2 = 1
 )
 }
 \arguments{
-\item{chpts}{a vector of increasing changepoint indices}
+\item{chpts}{a vector of increasing change-point indices}
 
 \item{means1}{vector of successive segment means for time series 1}
 
@@ -24,10 +24,10 @@ dataGenerator2D(
 \item{sdNoise2}{standard deviation of the Gaussian noise for time series 2}
 }
 \value{
-a dataframe with two simulated time series of same length
+a dataframe with two simulated time series with same length in component y1 and y2
 }
 \description{
-Generate data for changes in bivariate independent time series
+Generating data for change-point detection in bivariate independent time series
 }
 \examples{
 myData <- dataGenerator2D(chpts = c(30,100,120), means1 = c(0,5,0), means2 = c(7,1,-4))

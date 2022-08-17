@@ -1,2 +1,4 @@
 exportPattern("^[[:alpha:]]+")
 importFrom("stats", "rnorm")
+importFrom("graphics", "image", "par")
+importFrom("grDevices", "colorRampPalette", "gray.colors")
