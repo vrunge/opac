@@ -83,9 +83,9 @@ plot_2D <- function(data, theta, beta = 4*length(data$y1), color = "ramp")
   {
     M <- matrix(0, length(theta2), length(theta1))
     min_temp <- t * my_var(y1, y2, 1, t) + vect_m[1] + beta
-    for(i in 2:t)
+    for(k in 2:t)
     {
-      val1 <- (t - i + 1) * my_var(y1, y2, i, t) + vect_m[i] + beta
+      val1 <- (t - k + 1) * my_var(y1, y2, k, t) + vect_m[k] + beta
       if(val1 < min_temp){min_temp <- val1}
     }
     vect_m[t+1] <- min_temp
