@@ -4,7 +4,7 @@
 \alias{OP_2D}
 \title{OP_2D}
 \usage{
-OP_2D(data, beta = 4 * log(length(data$y1)))
+OP_2D(data, beta = 4 * log(nrow(data)))
 }
 \arguments{
 \item{data}{a dataframe with two components: y1 and y2, time series of same length}

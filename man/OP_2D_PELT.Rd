@@ -4,7 +4,7 @@
 \alias{OP_2D_PELT}
 \title{OP_2D_PELT}
 \usage{
-OP_2D_PELT(data, beta = 4 * log(length(data$y1)))
+OP_2D_PELT(data, beta = 4 * log(nrow(data)))
 }
 \arguments{
 \item{data}{a dataframe with two components: y1 and y2, time series of same length}
