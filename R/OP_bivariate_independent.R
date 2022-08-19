@@ -134,7 +134,7 @@ OP_2D_PELT <- function(data, beta = 4 * log(nrow(data)))
   }
   #return(list(cp = cp, costQ = costQ, changepoints = changepoints[-1]))
   #return(list(changepoints = changepoints[-1], nb = nb))
-  return(list(changepoints = changepoints[-1], nb = nb, costQ = costQ))
+  return(list(changepoints = changepoints[-1], nb = nb))
 }
 
 
@@ -314,7 +314,7 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
     changepoints <- c(pointval, changepoints) # update vector
     current <- pointval
   }
-  return(list(changepoints = changepoints[-1], nb = nb, cp = cp, costQ = costQ, nrows = nrows))
+  return(list(changepoints = changepoints[-1], nb = nb, nrows = nrows))
 }
 
 
