@@ -180,6 +180,18 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
     return(eval)
   }
   #########
+  eval_q_intersection <- function(j, k, t) #j<k<t
+  {
+    R <- (costQ[k]-costQ[j])/(k-j) - eval_var(j,k)
+    t1jt <- (cumy1[t]-cumy1[k])/(t-k)
+    t2jt <- (cumy2[t]-cumy2[k])/(t-k)
+    t1jk <- (cumy1[k]-cumy1[j])/(k-j)
+    t2jk <- (cumy2[k]-cumy2[j])/(k-j)
+    D <- (t1jt - t1jk)^2 + (t2jt - t2jk)^2
+    eval <- eval_q_min(k, t) + (t-k)*(sqrt(D)-sqrt(R))^2
+    return(eval)
+  }
+  #########
   ###
   ### INITIALIZATION
   ###
@@ -209,8 +221,6 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
   ###
   for(t in 2:n)
   {
-    print("info")
-    print(info)
     ######
     ###### STEP pruning info by costQ[t] + beta = m_{t-1} + beta (costQ[1] = m_0 = -beta)
     ######
@@ -231,17 +241,15 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
         t2k <- (cumy2[t]-cumy2[k])/(t-k)
         ind <- which(indexSet == k)
         if(eval_q(k, t, t1k, t2k) > eval_q(j, t, t1k, t2k)){omega_t_k[ind] <- max(omega_t_k[ind], info$m[i])}
-        #t1j <- (cumy1[t]-cumy1[j])/(t-j)
-        #t2j <- (cumy2[t]-cumy2[j])/(t-j)
-        #ind <- which(indexSet == j)
-        #if(eval_q(j, t, t1j, t2j) > eval_q(k, t, t1j, t2j)){omega_t_k[ind] <- max(omega_t_k[ind], info$m[i])}
+        t1j <- (cumy1[t]-cumy1[j])/(t-j)
+        t2j <- (cumy2[t]-cumy2[j])/(t-j)
+        ind <- which(indexSet == j)
+        if(eval_q(j, t, t1j, t2j) > eval_q(k, t, t1j, t2j)){omega_t_k[ind] <- max(omega_t_k[ind], info$m[i])}
+        #remove or not?
       }
     }
     ######### 2 ######### update indexSet (removing pruned indices)
     nonpruned <- NULL
-    #print("info")
-    #print(costQ[t] + beta)
-    #print(info)
     for(k in 1:length(indexSet))
     {
       if(omega_t_k[k] < costQ[t] + beta){nonpruned <- c(nonpruned, indexSet[k])}
@@ -268,27 +276,7 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
       }
       else
       {
-        if(j < k){myvar <- eval_var(j,k)}else{{myvar <- eval_var(k,j)}}
-        R <- (costQ[k]-costQ[j])/(k-j) - myvar
-
-          t1jt <- (cumy1[t+1]-cumy1[j])/(t-j+1)
-          t2jt <- (cumy2[t+1]-cumy2[j])/(t-j+1)
-          t1jk <- (cumy1[k]-cumy1[j])/(k-j)
-          t2jk <- (cumy2[k]-cumy2[j])/(k-j)
-          D <- (t1jt - t1jk)^2 + (t2jt - t2jk)^2
-          info$m[i] <- eval_q_min(k, t+1) + (t-k+1)*(sqrt(D)-sqrt(R))^2 ### pb valeur trop grande par rapport à réalité
-          info$m[i] <- 0
-        #else
-        {
-         # stop("kj")
-          t1kt <- (cumy1[t+1]-cumy1[k])/(t-k+1)
-          t2kt <- (cumy2[t+1]-cumy2[k])/(t-k+1)
-          t1kj <- (cumy1[j]-cumy1[k])/(j-k)
-          t2kj <- (cumy2[j]-cumy2[k])/(j-k)
-          D <- (t1kt - t1kj)^2 + (t2kt - t2kj)^2
-          #info$m[i] <- eval_q_min(j, t+1) + (t-j+1)*(sqrt(D)-sqrt(R))^2
-        }
-
+        info$m[i] <- eval_q_intersection(j, k, t+1)
       }
     }
     ######### 2 ######### adding new 3-points with t
@@ -296,14 +284,7 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
     info <- rbind(info, c(t, t, eval_q_min(t, t+1)))
     for(k in indexSet)
     {
-
-      R <- (costQ[t]-costQ[k])/(t-k) - eval_var(k,t)
-      t1kt1 <- (cumy1[t+1]-cumy1[k])/(t-k+1)
-      t2kt1 <- (cumy2[t+1]-cumy2[k])/(t-k+1)
-      t1kt <- (cumy1[t]-cumy1[k])/(t-k)
-      t2kt <- (cumy2[t]-cumy2[k])/(t-k)
-      D <- (t1kt1 - t1kt)^2 + (t2kt1 - t2kt)^2
-      info <- rbind(info, c(t, k, eval_q_min(k, t+1) + (t-k+1)*(sqrt(D)-sqrt(R))^2))
+      info <- rbind(info, c(t, k, eval_q_intersection(k, t, t+1)))
     }
     indexSet <- c(indexSet, t)
 
