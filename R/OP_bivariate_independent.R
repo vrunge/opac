@@ -1,6 +1,5 @@
 
 
-
 ############################################
 #############     OP_2D    #################
 ############################################
@@ -134,7 +133,7 @@ OP_2D_PELT <- function(data, beta = 4 * log(nrow(data)))
   }
   #return(list(cp = cp, costQ = costQ, changepoints = changepoints[-1]))
   #return(list(changepoints = changepoints[-1], nb = nb))
-  return(list(changepoints = changepoints[-1], nb = nb))
+  return(list(changepoints = changepoints[-1], nb = nb[1:(n-1)]))
 }
 
 
@@ -284,6 +283,8 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
     info <- rbind(info, c(t, t, eval_q_min(t, t+1)))
     for(k in indexSet)
     {
+      ### TO DO
+      ### add only if no circle inclusion with the bigger circle (last index in indexSet)
       info <- rbind(info, c(t, k, eval_q_intersection(k, t, t+1)))
     }
     indexSet <- c(indexSet, t)
@@ -314,7 +315,28 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
     changepoints <- c(pointval, changepoints) # update vector
     current <- pointval
   }
-  return(list(changepoints = changepoints[-1], nb = nb, nrows = nrows))
+  return(list(changepoints = changepoints[-1], nb = nb[2:n], nrows = nrows[2:n]))
+}
+
+
+
+
+
+###############################################
+#############     OP_2D_2C    #################
+###############################################
+
+#' OP_2D_2C
+#' @description Optimal Partitioning algorithm for bivariate independent time series (with OP2C algorithm)
+#' @param data a dataframe with two components: y1 and y2, time series of same length
+#' @param beta penalty
+#' @return a list with the change-point elements (each last index of each segment) and a vector nb counting the number of non-pruned elements at each iteration
+#' @examples
+#' OP_2D_2C(dataGenerator2D(chpts = c(30,100,120), means1 = c(0,1,0), means2 = c(7,1,-4)))
+OP_2D_2C <- function(data, beta = 4 * log(nrow(data)))
+{
+
+
 }
 
 
