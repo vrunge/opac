@@ -12,7 +12,7 @@
 The `opac` package can be installed from Github as follows:
 
 ```r
-#devtools::install_github("vrunge/opac")
+devtools::install_github("vrunge/opac")
 library(opac)
 ```
 
