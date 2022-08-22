@@ -7,7 +7,7 @@
 #' OP_2D
 #' @description Optimal Partitioning algorithm for bivariate independent time series (no pruning)
 #' @param data a dataframe with two components: y1 and y2, time series of same length
-#' @param beta penalty
+#' @param beta penalty value
 #' @return a list with the change-point elements (each last index of each segment)
 #' @examples
 #' OP_2D(dataGenerator2D(chpts = c(30,100,120), means1 = c(0,5,0), means2 = c(7,1,-4)))
@@ -68,7 +68,7 @@ OP_2D <- function(data, beta = 4 * log(nrow(data)))
 #' OP_2D_PELT
 #' @description Optimal Partitioning algorithm for bivariate independent time series (with PELT pruning)
 #' @param data a dataframe with two components: y1 and y2, time series of same length
-#' @param beta penalty
+#' @param beta penalty value
 #' @return a list with the change-point elements (each last index of each segment) and a vector nb counting the number of non-pruned elements at each iteration
 #' @examples
 #' OP_2D_PELT(dataGenerator2D(chpts = c(30,100,120), means1 = c(0,1,0), means2 = c(7,1,-4)))
@@ -145,7 +145,7 @@ OP_2D_PELT <- function(data, beta = 4 * log(nrow(data)))
 #' OP_2D_1C
 #' @description Optimal Partitioning algorithm for bivariate independent time series (with OP1C algorithm)
 #' @param data a dataframe with two components: y1 and y2, time series of same length
-#' @param beta penalty
+#' @param beta penalty value
 #' @return a list with the change-point elements (each last index of each segment) and a vector nb counting the number of non-pruned elements at each iteration
 #' @examples
 #' OP_2D_1C(dataGenerator2D(chpts = c(30,100,120), means1 = c(0,1,0), means2 = c(7,1,-4)))
@@ -182,14 +182,41 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
   eval_q_intersection <- function(j, k, t) #j<k<t
   {
     R <- (costQ[k]-costQ[j])/(k-j) - eval_var(j,k)
-    t1jt <- (cumy1[t]-cumy1[k])/(t-k)
-    t2jt <- (cumy2[t]-cumy2[k])/(t-k)
+    t1kt <- (cumy1[t]-cumy1[k])/(t-k)
+    t2kt <- (cumy2[t]-cumy2[k])/(t-k)
     t1jk <- (cumy1[k]-cumy1[j])/(k-j)
     t2jk <- (cumy2[k]-cumy2[j])/(k-j)
-    D <- (t1jt - t1jk)^2 + (t2jt - t2jk)^2
+    D <- (t1kt - t1jk)^2 + (t2kt - t2jk)^2
     eval <- eval_q_min(k, t) + (t-k)*(sqrt(D)-sqrt(R))^2
     return(eval)
   }
+
+  #########  #########  #########
+  test_inclusion <- function(j, k, t)
+  {
+    Rbig <- sqrt((costQ[t] - costQ[k])/(t-k) - eval_var(k,t))
+    Rsmall <- sqrt((costQ[t] - costQ[j])/(t-j) - eval_var(j,t))
+    t1kt <- (cumy1[t] - cumy1[k])/(t-k)
+    t2kt <- (cumy2[t] - cumy2[k])/(t-k)
+    t1jt <- (cumy1[t] - cumy1[j])/(t-j)
+    t2jt <- (cumy2[t] - cumy2[j])/(t-j)
+    D <- sqrt((t1kt - t1jt)^2 + (t2kt - t2jt)^2)
+    return((D + Rsmall) <= Rbig)
+  }
+
+
+  test_intersection <- function(j, k, t)
+  {
+    Rbig <- sqrt((costQ[t] - costQ[k])/(t-k) - eval_var(k,t))
+    Rsmall <- sqrt((costQ[t] - costQ[j])/(t-j) - eval_var(j,t))
+    t1kt <- (cumy1[t] - cumy1[k])/(t-k)
+    t2kt <- (cumy2[t] - cumy2[k])/(t-k)
+    t1jt <- (cumy1[t] - cumy1[j])/(t-j)
+    t2jt <- (cumy2[t] - cumy2[j])/(t-j)
+    D <- sqrt((t1kt - t1jt)^2 + (t2kt - t2jt)^2)
+    return(D > (Rsmall + Rbig))
+  }
+
   #########
   ###
   ### INITIALIZATION
@@ -279,14 +306,26 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
       }
     }
     ######### 2 ######### adding new 3-points with t
-
     info <- rbind(info, c(t, t, eval_q_min(t, t+1)))
-    for(k in indexSet)
+    if(length(indexSet) > 1)
     {
-      ### TO DO
-      ### add only if no circle inclusion with the bigger circle (last index in indexSet)
-      info <- rbind(info, c(t, k, eval_q_intersection(k, t, t+1)))
+      for(k in 1:(length(indexSet)-1))
+      {
+        #if(!(test_inclusion(indexSet[k], t)))# && !(eval_inclusionJK(indexSet[k],indexSet[k+1],t))) #test inclusion
+        #if(!(test_inclusion(indexSet[k],indexSet[k+1],t))) #test inclusion
+
+        if(!(test_inclusion(indexSet[k],indexSet[k+1],t)))
+        {info <- rbind(info, c(t, indexSet[k], eval_q_intersection(indexSet[k], t, t+1)))}
+      }
+      if(!(test_inclusion(indexSet[k+1], t-1,t))) #test inclusion
+      {
+        #print(test_inclusion(indexSet[k+1], t-1,t))
+        info <- rbind(info, c(t, indexSet[k+1], eval_q_intersection(indexSet[k+1], t, t+1)))
+      }
+
     }
+    else{info <- rbind(info, c(t, indexSet[1], eval_q_intersection(indexSet[1], t, t+1)))}
+
     indexSet <- c(indexSet, t)
 
 

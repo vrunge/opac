@@ -6,7 +6,7 @@
 #' OP_Reg
 #' @description Optimal Partitioning algorithm for changes in simple regression (no pruning)
 #' @param data a dataframe with two components: x and y, time series of same length
-#' @param beta penalty
+#' @param beta penalty value
 #' @return a list with the change-point elements (each last index of each segment)
 #' @examples
 #' OP_Reg(dataGeneratorRegression(chpts = c(50,100,150), A = c(-1,1,-1), B = c(-1,1,-1)))
@@ -80,7 +80,7 @@ OP_Reg <- function(data, beta = 4 * log(nrow(data)))
 #' OP_Reg_PELT
 #' @description Optimal Partitioning algorithm for changes in simple regression (with PELT pruning)
 #' @param data a dataframe with two components: x and y, time series of same length
-#' @param beta penalty
+#' @param beta penalty value
 #' @return a list with the change-point elements (each last index of each segment) and a vector nb counting the number of non-pruned elements at each iteration
 #' @examples
 #' OP_Reg_PELT(dataGeneratorRegression(chpts = c(50,100,150), A = c(-1,1,-1), B = c(-1,1,-1)))
