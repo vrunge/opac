@@ -59,7 +59,7 @@ OP_2D <- function(data, beta = 4 * log(nrow(data)))
   ###
   ### UPDATE rule Dynamic Programming
   ###
-  for(t in 1:n)
+  for(t in 1:n) # at t, transform Q_{t-1} into Q_{t}
   {
     min_temp <- Inf
     for(k in 1:t)
@@ -86,7 +86,6 @@ OP_2D <- function(data, beta = 4 * log(nrow(data)))
     current <- pointval
   }
   return(list(changepoints = changepoints[-1]))
-  #return(list(cp = cp, costQ = costQ, changepoints = changepoints[-1]))
 }
 
 
@@ -151,7 +150,7 @@ OP_2D_PELT <- function(data, beta = 4 * log(nrow(data)))
   ###
   ### update rule Dynamic Programming
   ###
-  for(t in 1:n)
+  for(t in 1:n) # at t, transform Q_{t-1} into Q_{t}
   {
     min_temp <- Inf
     for(k in indexSet)
@@ -167,13 +166,13 @@ OP_2D_PELT <- function(data, beta = 4 * log(nrow(data)))
     for(k in indexSet)
     {
       ### PRUNING STEP: reduce indexSet using the pruning test (inquality-based)
-      if(costQ[shift(t)] > costQ[k] + (shift(t)-k)*eval_var(k,t))
+      if(costQ[shift(t)] > costQ[shift(k-1)] + (t-k+1)*eval_var(k,t))
       {
         nonpruned <- c(nonpruned, k)
       }
     }
-    indexSet <- c(nonpruned, shift(t)) #add new test point
     nb[t] <- length(indexSet) ### count number of elements
+    indexSet <- c(nonpruned, shift(t)) #add new test point
   }
 
   #########
@@ -239,24 +238,24 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
   #########
   eval_q_min <- function(k, t) ###minimum of q_{t}^{k}, data y_{k} to y_{t}
   {
-    if(k == t){return(costQ[shift(k)-1] + beta)} ###costQ[shift(k)-1] = m_{k-1}
-    return((t-k+1)*eval_var(k,t) + costQ[shift(k)-1] + beta)
+    if(k == t){return(costQ[shift(k-1)] + beta)} ###costQ[shift(k)-1] = m_{k-1}
+    return((t - k + 1)*eval_var(k,t) + costQ[shift(k-1)] + beta)
   }
   #########
   eval_q <- function(k, t, t1, t2) ###value of q_{t-1}^{k}(t1,t2)
   {
-    return((t - k + 1)*((t1 - eval_meany1(k,t))^2 +  (t2 - eval_meany1(k,t))^2) + eval_q_min(k,t))
+    return((t - k + 1)*((t1 - eval_meany1(k,t))^2 +  (t2 - eval_meany2(k,t))^2) + eval_q_min(k,t))
   }
   #########
   eval_q_intersection <- function(j, k, t) ###value of m_{t}^{jk}
   {
-    R <- sqrt((costQ[shift(k)-1] - costQ[shift(j)-1])/(k-j) - eval_var(j,k-1))
+    R <- sqrt((costQ[shift(k-1)] - costQ[shift(j-1)])/(k-j) - eval_var(j,k-1))
     t1kt <- eval_meany1(k,t)
     t2kt <- eval_meany2(k,t)
     t1jk <- eval_meany1(j,k-1)
     t2jk <- eval_meany2(j,k-1)
     D <- sqrt((t1kt - t1jk)^2 + (t2kt - t2jk)^2)
-    return(eval_q_min(k, t) + (t-k+1)*(D - R)^2)
+    return(eval_q_min(k, t) + (t - k + 1)*(D - R)^2)
   }
 
   #########  #########  #########
@@ -265,24 +264,24 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
 
   test_inclusion <- function(j, k, t) #j < k to prune j
   {
-    Rsmall <- sqrt((costQ[shift(t)-1] - costQ[shift(j)-1])/(t-j) - eval_var(j,t-1))
-    Rbig <- sqrt((costQ[shift(t)-1] - costQ[shift(k)-1])/(t-k) - eval_var(k,t-1))
-    t1kt <- eval_meany1(k,t-1)
-    t2kt <- eval_meany2(k,t-1)
+    Rsmall <- sqrt((costQ[shift(t-1)] - costQ[shift(j-1)])/(t-j) - eval_var(j,t-1))
+    Rbig <- sqrt((costQ[shift(t-1)] - costQ[shift(k-1)])/(t-k) - eval_var(k,t-1))
     t1jt <- eval_meany1(j,t-1)
     t2jt <- eval_meany2(j,t-1)
+    t1kt <- eval_meany1(k,t-1)
+    t2kt <- eval_meany2(k,t-1)
     D <- sqrt((t1kt - t1jt)^2 + (t2kt - t2jt)^2)
     return((D + Rsmall) <= Rbig)
   }
 
   test_intersection <- function(j, k, t)
   {
-    Rsmall <- sqrt((costQ[shift(t)-1] - costQ[shift(j)-1])/(t-j) - eval_var(j,t-1))
-    Rbig <- sqrt((costQ[shift(t)-1] - costQ[shift(k)-1])/(t-k) - eval_var(k,t-1))
-    t1kt <- eval_meany1(k,t-1)
-    t2kt <- eval_meany2(k,t-1)
+    Rsmall <- sqrt((costQ[shift(t-1)] - costQ[shift(j-1)])/(t-j) - eval_var(j,t-1))
+    Rbig <- sqrt((costQ[shift(t-1)] - costQ[shift(k-1)])/(t-k) - eval_var(k,t-1))
     t1jt <- eval_meany1(j,t-1)
     t2jt <- eval_meany2(j,t-1)
+    t1kt <- eval_meany1(k,t-1)
+    t2kt <- eval_meany2(k,t-1)
     D <- sqrt((t1kt - t1jt)^2 + (t2kt - t2jt)^2)
     return(D > (Rsmall + Rbig))
   }
@@ -308,15 +307,19 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
   ###
   ### update rule Dynamic Programming
   ###
-  for(t in 1:(n-1))
+  for(t in 1:(n-1)) # at t, transform Q_t into Q_{t+1}
   {
     #########
-    ######### STEP pruning info by costQ[shift(t)]  + beta = m_{t} + beta (costQ[shift(0)] = costQ[1] = m_0 = -beta)
+    ######### STEP pruning info by costQ[shift(t)]  + beta = m_{t} + beta
     ######### = min Q_{t}(.,.) + beta
+    ######### (costQ[shift(0)] = costQ[1] = m_0 = -beta)
     #########
 
+    ######### 1 #########
     ######### 1 ######### find omega_{t}^k
-    omega_t_k <- rep(-Inf, length(indexSet))
+    ######### 1 #########
+
+    omega_t_k <- rep(-Inf, length(indexSet)) #indexSet[u] = l, omega_t_k[u] for k = l
     for(i in 1:nrow(info))
     {
       k <- info$k[i]
@@ -328,32 +331,38 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
       }
       else
       {
-        t1k <- eval_meany1(k,t) #mean y_k to y_t
+        t1k <- eval_meany1(k,t)
         t2k <- eval_meany2(k,t)
-        ind <- which(indexSet == k)
-        if(eval_q(k, t, t1k, t2k) > eval_q(j, t, t1k, t2k)){omega_t_k[ind] <- max(omega_t_k[ind], info$m[i])}
-        t1j <- eval_meany1(j,t) #mean y_j to y_t
+        ind_k <- which(indexSet == k)
+        if(eval_q_min(k, t) > eval_q(j, t, t1k, t2k)){omega_t_k[ind_k] <- max(omega_t_k[ind_k], info$m[i])}
+        t1j <- eval_meany1(j,t)
         t2j <- eval_meany1(j,t)
-        ind <- which(indexSet == j)
-        if(eval_q(j, t, t1j, t2j) > eval_q(k, t, t1j, t2j)){omega_t_k[ind] <- max(omega_t_k[ind], info$m[i])}
+        ind_j <- which(indexSet == j)
+        if(eval_q_min(j, t) > eval_q(k, t, t1j, t2j)){omega_t_k[ind_j] <- max(omega_t_k[ind_j], info$m[i])}
       }
     }
+
+    ######### 2 #########
     ######### 2 ######### update indexSet (removing pruned indices)
+    ######### 2 #########
+
     nonpruned <- NULL
     for(k in 1:length(indexSet))
     {
-      if(omega_t_k[k] < costQ[shift(t)] + beta){nonpruned <- c(nonpruned, indexSet[k])}
+      if(omega_t_k[k] <= costQ[shift(t)] + beta){nonpruned <- c(nonpruned, indexSet[k])}
     }
     indexSet <- nonpruned
 
+    ######### 3 #########
     ######### 3 ######### update info (removing rows with pruned indices)
-    info <- info[(info$k %in% indexSet) & (info$j %in% indexSet), ]
+    ######### 3 #########
 
+    info <- info[(info$k %in% indexSet) & (info$j %in% indexSet), ]
     nb[t] <- length(indexSet) ### count number of elements for DP
     nrows[t] <- nrow(info) ### count number of rowd in info dataframe
 
     #########
-    ######### STEP updating info with new data point y_t
+    ######### STEP updating info with new data point y_{t+1}
     #########
 
     ######### 1 #########
@@ -380,7 +389,7 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
 
     info <- rbind(info, c(t+1, t+1, eval_q_min(t+1, t+1))) #min of q_{t+1}^{t+1}
 
-    for(j in indexSet)
+    for(j in indexSet) #m_{t+1}^(j(t+1)) optimization under one constraint solution
     {
       inclus <- FALSE
       for(k in indexSet)
@@ -388,9 +397,7 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
         if(j != k){if(test_inclusion(j, k, t+1)){inclus <- TRUE}}
       }
       if(inclus == FALSE){info <- rbind(info, c(t+1, j, eval_q_intersection(j, t+1, t+1)))}
-
     }
-
 
     ###add new index t
     indexSet <- c(indexSet, t+1)
@@ -405,7 +412,7 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
       eval <- eval_q_min(k, t+1) ### find min of q_{t+1}^k
       if(eval < min_temp){min_temp <- eval; index <- k}
     }
-    costQ[shift(t+1)] <- min_temp #costQ[shift(t+1)] <- min_temp ### find m_{t+1}
+    costQ[shift(t+1)] <- min_temp # this is find m_{t+1}
     cp[t+1] <- index - 1
   }
 
@@ -422,7 +429,7 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
     changepoints <- c(pointval, changepoints) # update vector
     current <- pointval
   }
-  return(list(changepoints = changepoints[-1], nb = nb, nrows = nrows))
+  return(list(changepoints = changepoints[-1],  nb = nb[1:(n-1)], nrows = nrows[1:(n-1)]))
 }
 
 

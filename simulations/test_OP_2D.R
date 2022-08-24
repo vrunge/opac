@@ -25,7 +25,7 @@ globalCost_Reg(data, Reg2$changepoints, myBeta)
 ##############################
 
 
-n <- 1000
+n <- 100
 myBeta <- 4*log(n)
 v12 <- 1
 data <- dataGenerator2D(chpts <- 1:n,
@@ -45,7 +45,6 @@ R2
 ### plot ###
 R2$changepoints
 plot(R2$nb, type = 'l')
-
 abline(v = R2$changepoints, col = 2)
 
 
@@ -53,12 +52,12 @@ abline(v = R2$changepoints, col = 2)
 ############################################################################
 
 
-n <- 100
-myBeta <- 1*log(n)
+n <- 500
+myBeta <- 3*log(n)
 v12 <- 1
-data <- dataGenerator2D(chpts = c(n/2,n),
-                        means1 = c(0,1),
-                        means2 = c(0,2),
+data <- dataGenerator2D(chpts = c(n),
+                        means1 = c(1),
+                        means2 = c(2),
                         sdNoise1 = 1,
                         sdNoise2 = 1)
 
@@ -71,13 +70,18 @@ R3 <- OP_2D_1C(data = data, beta = myBeta)
 ### CHANGEPOINT
 
 all(R1$changepoints == R2$changepoints)
-all(R1$changepoints == R2$changepoints)
 all(R1$changepoints == R3$changepoints)
 
 R1$changepoints
+R2$changepoints
 R3$changepoints
 
+(R2$cp == R3$cp)
 
+R2$cp
+R3$cp
+R2$costQ
+R3$costQ
 
 globalCost_2D(data, R1$changepoints, myBeta)
 globalCost_2D(data, R2$changepoints, myBeta)
@@ -90,36 +94,15 @@ globalCost_2D(data, R3$changepoints, myBeta)
 
 
 
-
-R1$nb
-(R2$nrows)/(R2$nb^2)/R2$nb
-
-
-
-
-which(R2$nb-R1$nb>0)
-
-ymax <- (max(R1$nb, R2$nb))
+ymax <- (max(R2$nb, R3$nb))
 plot((R2$nb), type = 'l', ylim = c(0,ymax))
 par(new = TRUE)
 plot((R3$nb), type = 'l', col = 2, ylim = c(0,ymax))
 
-R1$changepoints
-R2$changepoints
 
+###
 
-plot(R3$nb - R2$nb, type = 'l', col = 3)
-
-all(R2$nrows == R2$nb*(R2$nb+1)/2)
-
-1 - (R3$nrows-R3$nb) / (R3$nb*(R3$nb-1)/2) ### reduction of the cross terms in percent
+1 - ((R3$nrows-R3$nb) / (R3$nb*(R3$nb-1)/2)) ### reduction of the cross terms in percent
 R3$nb
 
 sum(1 - (R3$nrows-R3$nb) / (R3$nb*(R3$nb-1)/2) > 0.4, na.rm = T)
-
-R2$nb
-R3$nb
-
-R2$changepoints
-R3$changepoints
-
