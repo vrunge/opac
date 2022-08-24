@@ -1,8 +1,11 @@
 
+
+#TO DO Antonina: use cumsum + vizualisation in paper + plot3D-2D for pb A / B
+
+
 ########################################################
 #############     theta_grid_square    #################
 ########################################################
-
 
 theta_grid_square <- function(data, bound1 = c(0,1), bound2 = c(0,1), n12 = c(100,100), margin = c(0.05, 0.05))
 {

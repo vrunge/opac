@@ -9,7 +9,7 @@ OP_Reg(data, beta = 4 * log(nrow(data)))
 \arguments{
 \item{data}{a dataframe with two components: x and y, time series of same length}
 
-\item{beta}{penalty}
+\item{beta}{penalty value}
 }
 \value{
 a list with the change-point elements (each last index of each segment)
