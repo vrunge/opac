@@ -52,8 +52,8 @@ abline(v = R2$changepoints, col = 2)
 ############################################################################
 
 
-n <- 500
-myBeta <- 3*log(n)
+n <- 100
+myBeta <- 4*log(n)
 v12 <- 1
 data <- dataGenerator2D(chpts = c(n),
                         means1 = c(1),
@@ -106,3 +106,43 @@ plot((R3$nb), type = 'l', col = 2, ylim = c(0,ymax))
 R3$nb
 
 sum(1 - (R3$nrows-R3$nb) / (R3$nb*(R3$nb-1)/2) > 0.4, na.rm = T)
+
+
+
+
+
+
+############################################################################
+############################################################################
+############################################################################
+############################################################################
+############################################################################
+
+
+n <- 100
+myBeta <- 8*log(n)
+v12 <- 1
+data <- dataGenerator2D(chpts = c(n),
+                        means1 = c(1),
+                        means2 = c(2),
+                        sdNoise1 = 1,
+                        sdNoise2 = 1)
+
+plot(data$y2)
+R3 <- OP_2D_1C(data = data, beta = myBeta)
+R4 <- OP_2D_2C(data = data, beta = myBeta)
+
+
+### CHANGEPOINT
+all(R3$changepoints == R4$changepoints)
+
+R3$changepoints
+R4$changepoints
+
+R3$nb
+R4$nb
+
+
+R3$nb - R4$nb
+R4$nb / R3$nb
+
