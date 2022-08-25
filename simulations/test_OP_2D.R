@@ -120,7 +120,7 @@ sum(1 - (R3$nrows-R3$nb) / (R3$nb*(R3$nb-1)/2) > 0.4, na.rm = T)
 
 
 n <- 100
-myBeta <- 8*log(n)
+myBeta <- 4*log(n)
 v12 <- 1
 data <- dataGenerator2D(chpts = c(n),
                         means1 = c(1),
@@ -145,4 +145,4 @@ R4$nb
 
 R3$nb - R4$nb
 R4$nb / R3$nb
-
+R4$nrows3

@@ -274,18 +274,6 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
     return((D + Rsmall) <= Rbig)
   }
 
-  test_intersection <- function(j, k, t)
-  {
-    Rsmall <- sqrt((costQ[shift(t-1)] - costQ[shift(j-1)])/(t-j) - eval_var(j,t-1))
-    Rbig <- sqrt((costQ[shift(t-1)] - costQ[shift(k-1)])/(t-k) - eval_var(k,t-1))
-    t1jt <- eval_meany1(j,t-1)
-    t2jt <- eval_meany2(j,t-1)
-    t1kt <- eval_meany1(k,t-1)
-    t2kt <- eval_meany2(k,t-1)
-    D <- sqrt((t1kt - t1jt)^2 + (t2kt - t2jt)^2)
-    return(D > (Rsmall + Rbig))
-  }
-
   #########
   ###
   ### INITIALIZATION
@@ -520,29 +508,16 @@ OP_2D_2C <- function(data, beta = 4 * log(nrow(data)))
     D <- sqrt((t1i - t1j)^2 + (t2i - t2j)^2)
     if((D > Ri + Rj) | (D < Ri - Rj) | (D < Rj - Ri)){return(list(m = -Inf, p = c(0,0)))}
     rho <- (1/2)*(Ri^2 - Rj^2)/D^2
-    mu <- (1/2)*((Ri + Rj)/D^2)*sqrt(((Ri+Rj)^2 - D^2)*(D^2 - (Ri-Rj)^2))
+    mu <- (1/2)*((Ri + Rj)/D^2)*sqrt(((Ri + Rj)^2 - D^2)*(D^2 - (Ri - Rj)^2))
     t1A <- (1/2)*(t1i + t1j) - rho*(t1i - t1j) + mu*(t2i - t2j)
     t2A <- (1/2)*(t2i + t2j) - rho*(t2i - t2j) - mu*(t1i - t1j)
     t1B <- (1/2)*(t1i + t1j) - rho*(t1i - t1j) - mu*(t2i - t2j)
     t2B <- (1/2)*(t2i + t2j) - rho*(t2i - t2j) + mu*(t1i - t1j)
-    mA <- eval_q(k,t,t1A,t2A)
-    mB <- eval_q(k,t,t1B,t2B)
-    res <- which.min(c(mA,mB))
-    if(res == 1){return(list(m = mA, p = c(t1A,t2A)))}
-    if(res == 2){return(list(m = mB, p = c(t1B,t2B)))}
-  }
-  #########
-  position3 <- function(i, j, k)
-  {
-    R <- sqrt((costQ[shift(k-1)] - costQ[shift(j-1)])/(k-j) - eval_var(j,k-1))
-    t1kt <- eval_meany1(k,t)
-    t2kt <- eval_meany2(k,t)
-    t1jk <- eval_meany1(j,k-1)
-    t2jk <- eval_meany2(j,k-1)
-    D <- sqrt((t1kt - t1jk)^2 + (t2kt - t2jk)^2)
-    if(D == 0){return(c(t1kt + R, t2kt))}
-    s <- R/D
-    return(c(s*t1kt + (1-s)*t1jk, s*t2kt + (1-s)*t2jk))
+    mA <- eval_q(k, t, t1A, t2A)
+    mB <- eval_q(k, t, t1B, t2B)
+    res <- which.min(c(mA, mB))
+    if(res == 1){return(list(m = mA, p = c(t1A, t2A)))}
+    if(res == 2){return(list(m = mB, p = c(t1B, t2B)))}
   }
 
   #########  #########  #########
@@ -561,18 +536,6 @@ OP_2D_2C <- function(data, beta = 4 * log(nrow(data)))
     return((D + Rsmall) <= Rbig)
   }
 
-  test_intersection <- function(j, k, t)
-  {
-    Rsmall <- sqrt((costQ[shift(t-1)] - costQ[shift(j-1)])/(t-j) - eval_var(j,t-1))
-    Rbig <- sqrt((costQ[shift(t-1)] - costQ[shift(k-1)])/(t-k) - eval_var(k,t-1))
-    t1jt <- eval_meany1(j,t-1)
-    t2jt <- eval_meany2(j,t-1)
-    t1kt <- eval_meany1(k,t-1)
-    t2kt <- eval_meany2(k,t-1)
-    D <- sqrt((t1kt - t1jt)^2 + (t2kt - t2jt)^2)
-    return(D > (Rsmall + Rbig))
-  }
-
   #########
   ###
   ### INITIALIZATION
@@ -582,6 +545,7 @@ OP_2D_2C <- function(data, beta = 4 * log(nrow(data)))
   cp <- rep(0, n) #cp vector cp[i] = index of the last change-point for data y(1) to y(i)
   nb <- rep(0, n) #nb element for minimization in DP
   nrows <- rep(0, n) #nb rows in info dataframe
+  nrows3 <- rep(0, n) #nb rows in info dataframe
 
   info <- data.frame(matrix(ncol = 3, nrow = 0)) ### info for pruning
   colnames(info) <- c("k", "j", "m")
@@ -669,8 +633,39 @@ OP_2D_2C <- function(data, beta = 4 * log(nrow(data)))
     ######### 3 #########
 
     info <- info[(info$k %in% indexSet) & (info$j %in% indexSet), ]
+    test <- (info3$k %in% indexSet) & (info3$j %in% indexSet) & (info3$i %in% indexSet)
+    test[1] <- TRUE #save the first row
+    info3 <- info3[test, ]
+
+    if(nrow(info3) > 1)
+    {
+    stay <- rep(TRUE, nrow(info3))
+    for(l in 2:nrow(info3))
+    {
+      #print(info3$i[l])
+      #print(info3$j[l])
+      #print(info3$k[l])
+      #print("plus grand")
+      #print(info3$m[l])
+      #print("plus petit")
+      #print( eval_q_intersection(info3$i[l],info3$k[l],t))
+      #print( eval_q_intersection(info3$j[l],info3$k[l],t))
+      if(info3$m[l] < eval_q_intersection(info3$j[l],info3$k[l],t)){stop("")}
+      if(info3$m[l] < eval_q_intersection(info3$i[l],info3$k[l],t)){stop("")}
+      #if(info3$m[l] < eval_q_intersection(info3$i[l],info3$j[l],t)){stop("")}
+      for(m in indexSet)
+      {
+        if((m != info3$k[l]) && (m != info3$j[l]) && (m != info3$i[l]))
+        {if(eval_q(m, t, info3$ijk1[l], info3$ijk2[l]) < info3$m[l]){stay[l] <- FALSE}}
+      }
+    }
+    info3 <- info3[stay, ]
+    }
+    ### + IF index not in info3, remove (with pb for 2 quadratics) from info
+
     nb[t] <- length(indexSet) ### count number of elements for DP
-    nrows[t] <- nrow(info) ### count number of rowd in info dataframe
+    nrows[t] <- nrow(info) ### count number of rows in info dataframe
+    nrows3[t] <- nrow(info3) ### count number of rows in info3 dataframe
 
     #########
     ######### STEP updating info with new data point y_{t+1}
@@ -788,7 +783,7 @@ OP_2D_2C <- function(data, beta = 4 * log(nrow(data)))
     changepoints <- c(pointval, changepoints) # update vector
     current <- pointval
   }
-  return(list(changepoints = changepoints[-1],  nb = nb[1:(n-1)], nrows = nrows[1:(n-1)]))
+  return(list(changepoints = changepoints[-1],  nb = nb[1:(n-1)], nrows = nrows[1:(n-1)], nrows3 = nrows3[1:(n-1)]))
 }
 
 
