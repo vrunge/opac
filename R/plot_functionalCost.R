@@ -21,9 +21,10 @@ theta_grid_square_2D <- function(data, bound1 = c(0,1), bound2 = c(0,1), n12 = c
     return(list(theta1 = theta1, theta2 = theta2, Theta = Theta))
 }
 
+##############################################
+##############################################
 
 rotate <- function(x) t(apply(x, 2, rev))
-
 
 ##############################################
 #############     my_plot    #################
@@ -70,9 +71,6 @@ plot_2D <- function(data, theta, beta = 4*length(data$y1), color = "ramp")
   cumy2 <- cumsum(c(0, y2))
   cumyS <- cumsum(c(0, y1^2 + y2^2))
 
-  if(color == "grey"){palette <- gray.colors(n, start = 1, end = 0)}
-  if(color == "ramp"){palette <- colorRampPalette(c("red", "white", "blue"), space = "Lab")(n)}
-
   #########
   ###
   ### INNER FUNCTIONS (EVAL)
@@ -102,6 +100,8 @@ plot_2D <- function(data, theta, beta = 4*length(data$y1), color = "ramp")
 
   costQ <- rep(0, n + 1)
   costQ[1] <- -beta
+  if(color == "grey"){palette <- gray.colors(n, start = 1, end = 0)}
+  if(color == "ramp"){palette <- colorRampPalette(c("red", "white", "blue"), space = "Lab")(n)}
 
   #########
   ###
