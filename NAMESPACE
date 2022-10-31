@@ -3,6 +3,7 @@ importFrom("stats", "rnorm")
 importFrom("graphics", "image", "par")
 importFrom("grDevices", "colorRampPalette", "gray.colors")
 importFrom("stats", "lm")
+importFrom("stats", "var")
 
 import(data.table)
 import(dplyr)
