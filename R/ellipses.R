@@ -104,16 +104,93 @@ my.coeff.ellipse.from.data <- function(x, y, level)
   coeffC1 <- c(1,0,1,-2*a,-2*b,-D*d1 + a^2 + b^2)
   coeffC2 <- c(1,0,1,-2*a,-2*b,-D*d2 + a^2 + b^2)
 
+  s <- 4*Vx/(A/n+1)^2
+  e <- sqrt(1  - (1 - sqrt(1-s))/(1 + sqrt(1-s)))
   ratio <- (1-mean(x^2))/mean(x)
   xx <- ratio- sqrt(ratio^2+4)
 
   return(list(coeffEllipse = coeffEllipse,
               coeffC1 = coeffC1,
               coeffC2 = coeffC2,
+              ratioInExcentricity = s,
+              excentricity = e,
               ratio = ratio,
               xx = xx,
               cosangle = 1/sqrt(1+xx^2),
               sinangle = xx/sqrt(1+xx^2),
               angle = 1/2*atan(B/(A-C))/pi))
 }
+
+
+
+#' dualFunctionB_q_1
+#'
+#' @description Building the dual function in problem B with one constraint
+#' @param coeff1 coefficients (A,B,C,D,E,F) in objective function Ax^2 + Bxy + Cy^2 + Dx + Ey + F
+#' @param coeff2 coefficients (A,B,C,D,E,F) in constraint Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0
+#' @param x vector x for plot
+#' @return the dual function to problem B with one constraint
+#' @examples
+#' dualFunctionB_q_1(c(10,-5,2,4,2,-6), c(10,-5,2,4,2,-6), seq(-5,5,0.01))
+dualFunctionB_q_1 <- function(coeff1, coeff2, x)
+{
+  coeff1 <- coeff1 * c(1,2,1,2,2,1)
+  coeff2 <- coeff2 * c(1,2,1,2,2,1)
+  a <- coeff1[1] + x*coeff2[1]
+  b <- coeff1[2] + x*coeff2[2]
+  c <- coeff1[3] + x*coeff2[3]
+  d <- coeff1[4] + x*coeff2[4]
+  e <- coeff1[5] + x*coeff2[5]
+  f <- coeff1[6] + x*coeff2[6]
+  t1 <- (b*e-c*d)/(a*c-b^2)
+  t2 <- (b*d-a*e)/(a*c-b^2)
+  m <- (-c*d^2 - a*e^2 + 2*b*d*e)/(a*c-b^2) + f
+  return(list(t1= t1, t2 = t2, m = m, det = a*c-b^2))
+}
+
+
+
+dualFunctionB <- function(coeff1, coeff2, x)
+{
+  coeff1 <- coeff1 * c(1,2,1,2,2,1)
+  coeff2 <- coeff2 * c(1,2,1,2,2,1)
+  a <- coeff1[1] + x*coeff2[1]
+  b <- coeff1[2] + x*coeff2[2]
+  c <- coeff1[3] + x*coeff2[3]
+  d <- coeff1[4] + x*coeff2[4]
+  e <- coeff1[5] + x*coeff2[5]
+  f <- coeff1[6] + x*coeff2[6]
+  t1 <- -d/a
+  t2 <- -e/c
+  m <- -d^2/a -e^2/c + f
+  return(list(t1= t1, t2 = t2, m = m, det = a*c-b^2))
+}
+
+
+
+
+
+
+primalFunctionB <- function(coeff1, coeff2, x)
+{
+  coeff1 <- coeff1 * c(1,2,1,2,2,1)
+  coeff2 <- coeff2 * c(1,2,1,2,2,1)
+  a <- coeff1[1] + x*coeff2[1]
+  b <- coeff1[2] + x*coeff2[2]
+  c <- coeff1[3] + x*coeff2[3]
+  d <- coeff1[4] + x*coeff2[4]
+  e <- coeff1[5] + x*coeff2[5]
+  f <- coeff1[6] + x*coeff2[6]
+  t1 <- (b*e-c*d)/(a*c-b^2)
+  t2 <- (b*d-a*e)/(a*c-b^2)
+  t1 <- (b*e-c*d)
+  t2 <- (b*d-a*e)
+
+  res <- coeff2[1]*t1^2 + 2*coeff2[2]*t1*t2 + coeff2[3]*t2^2 + coeff2[4]*t1*(a*c-b^2) + coeff2[5]*t2*(a*c-b^2) + coeff2[6]*(a*c-b^2)^2
+  return(list(p = res))
+}
+
+
+
+
 
