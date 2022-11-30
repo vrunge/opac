@@ -150,6 +150,8 @@ dualFunctionB_q_1 <- function(coeff1, coeff2, x)
 
 
 
+
+
 dualFunctionB <- function(coeff1, coeff2, x)
 {
   coeff1 <- coeff1 * c(1,2,1,2,2,1)
@@ -165,7 +167,6 @@ dualFunctionB <- function(coeff1, coeff2, x)
   m <- -d^2/a -e^2/c + f
   return(list(t1= t1, t2 = t2, m = m, det = a*c-b^2))
 }
-
 
 
 
