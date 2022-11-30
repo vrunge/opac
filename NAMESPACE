@@ -1,9 +1,11 @@
 exportPattern("^[[:alpha:]]+")
-importFrom("stats", "rnorm")
 importFrom("graphics", "image", "par")
 importFrom("grDevices", "colorRampPalette", "gray.colors")
+
+importFrom("stats", "rnorm")
 importFrom("stats", "lm")
 importFrom("stats", "var")
+importFrom("stats", "rpois")
 
 import(data.table)
 import(dplyr)

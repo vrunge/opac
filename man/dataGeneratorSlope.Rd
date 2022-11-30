@@ -4,20 +4,27 @@
 \alias{dataGeneratorSlope}
 \title{dataGeneratorSlope}
 \usage{
-dataGeneratorSlope(chpts = c(1, 100), kinks = c(1, 5), varNoise = 0.1)
+dataGeneratorSlope(
+  chpts = c(1, 100),
+  kinks = c(1, 5),
+  varNoise = 0.1,
+  type = "gauss"
+)
 }
 \arguments{
-\item{chpts}{a vector of increasing changepoint indices}
+\item{chpts}{a vector of increasing change-point indices}
 
-\item{kinks}{vector of successive kink values (kink height)}
+\item{kinks}{vector of successive kink values (kink heights)}
 
 \item{varNoise}{variance of the Gaussian noise}
+
+\item{type}{the model: gauss or poisson}
 }
 \value{
 a vector of (univariate) simulated data following the (chpts, kinks) 2D data-points.
 }
 \description{
-Generate data with a given continuous piecewise linear model
+Generate data with a given continuous piece-wise linear model
 }
 \examples{
 myData <- dataGeneratorSlope(chpts = c(1,30,100,150), kinks = c(-2,pi,0.001,2.1), varNoise = 0.1)

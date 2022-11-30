@@ -11,6 +11,7 @@
 #' @param means2 vector of successive segment means for time series 2
 #' @param sdNoise1 standard deviation of the Gaussian noise for time series 1
 #' @param sdNoise2 standard deviation of the Gaussian noise for time series 2
+#' @param type the model: gauss or poisson
 #' @return a dataframe with two simulated time series with same length in component y1 and y2
 #' @examples
 #' myData <- dataGenerator2D(chpts = c(30,100,120), means1 = c(0,5,0), means2 = c(7,1,-4))
@@ -18,7 +19,8 @@ dataGenerator2D <- function(chpts = 100,
                             means1 = 0,
                             means2 = 0,
                             sdNoise1 = 1,
-                            sdNoise2 = 1)
+                            sdNoise2 = 1,
+                            type = "gauss")
 {
   ############
   ### STOP ###
@@ -32,13 +34,22 @@ dataGenerator2D <- function(chpts = 100,
   if(length(chpts) != length(means2)){stop('chpts and means2 vectors are of different size')}
   if(sdNoise1 < 0){stop('sdNoise1 cannot be negative')}
   if(sdNoise2 < 0){stop('sdNoise2 cannot be negative')}
+  if(type == "poisson"){if(min(c(means1, means2)) <= 0){stop('no negative mean allowed for Poisson model')}}
 
   n <- chpts[length(chpts)]
   repetition <- c(chpts[1], diff(chpts))
   mu1 <- rep(means1, repetition)
   mu2 <- rep(means2, repetition)
-  y1 <- rnorm(n, mean = mu1, sd = sdNoise1)
-  y2 <- rnorm(n, mean = mu2, sd = sdNoise2)
+  if(type == "gauss")
+  {
+    y1 <- rnorm(n, mean = mu1, sd = sdNoise1)
+    y2 <- rnorm(n, mean = mu2, sd = sdNoise2)
+  }
+  if(type == "poisson")
+  {
+    y1 <- rpois(n = n, lambda = mu1)
+    y2 <- rpois(n = n, lambda = mu2)
+  }
   return(data.frame(y1 = y1, y2 = y2))
 }
 
@@ -103,10 +114,11 @@ dataGeneratorRegression <- function(chpts = 100,
 #' @param chpts a vector of increasing change-point indices
 #' @param kinks vector of successive kink values (kink heights)
 #' @param varNoise variance of the Gaussian noise
+#' @param type the model: gauss or poisson
 #' @return a vector of (univariate) simulated data following the (chpts, kinks) 2D data-points.
 #' @examples
 #' myData <- dataGeneratorSlope(chpts = c(1,30,100,150), kinks = c(-2,pi,0.001,2.1), varNoise = 0.1)
-dataGeneratorSlope <- function(chpts = c(1, 100), kinks = c(1, 5), varNoise = 0.1)
+dataGeneratorSlope <- function(chpts = c(1, 100), kinks = c(1, 5), varNoise = 0.1, type = "gauss")
 {
   ############
   ### STOP ###
@@ -119,10 +131,19 @@ dataGeneratorSlope <- function(chpts = c(1, 100), kinks = c(1, 5), varNoise = 0.
   if(length(chpts) != length(kinks)){stop('chpts and kinks vectors are of different size')}
   if(!is.double(varNoise)){stop('varNoise is not a double.')}
   if(varNoise < 0){stop('varNoise must be nonnegative')}
+  if(type == "poisson"){if(min(kinks) <= 0){stop('no negative mean allowed for Poisson model')}}
 
   steps <- diff(kinks)/diff(chpts)
   response <- c(kinks[1], cumsum(rep(steps, diff(chpts))) + kinks[1])
-  response <- response + rnorm(length(response), 0, sqrt(varNoise))
+
+  if(type == "gauss")
+  {
+    response <- response + rnorm(length(response), 0, sqrt(varNoise))
+  }
+  if(type == "poisson")
+  {
+    response <- rpois(length(response), response)
+  }
   return(response)
 }
 

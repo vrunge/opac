@@ -9,7 +9,8 @@ dataGenerator2D(
   means1 = 0,
   means2 = 0,
   sdNoise1 = 1,
-  sdNoise2 = 1
+  sdNoise2 = 1,
+  type = "gauss"
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ dataGenerator2D(
 \item{sdNoise1}{standard deviation of the Gaussian noise for time series 1}
 
 \item{sdNoise2}{standard deviation of the Gaussian noise for time series 2}
+
+\item{type}{the model: gauss or poisson}
 }
 \value{
 a dataframe with two simulated time series with same length in component y1 and y2
