@@ -87,7 +87,7 @@ plot_2D <- function(data, theta, beta = 4*length(data$y1), color = "ramp")
     return(eval_meanS(j,k) - (eval_meany1(j,k)^2 + eval_meany2(j,k)^2))
   }
   #########
-  eval_q_min <- function(k, t) ###minimum of q_{t}^{k}, data y_{k} to y_{t}
+  eval_q_min2 <- function(k, t) ###minimum of q_{t}^{k}, data y_{k} to y_{t}
   {
     if(k == t){return(costQ[shift(k-1)] + beta)} ###costQ[shift(k)-1] = m_{k-1}
     return((t - k + 1)*eval_var(k,t) + costQ[shift(k-1)] + beta)
@@ -95,7 +95,7 @@ plot_2D <- function(data, theta, beta = 4*length(data$y1), color = "ramp")
   #########
   eval_q <- function(k, t, t1, t2) ###value of q_{t-1}^{k}(t1,t2)
   {
-    return((t - k + 1)*((t1 - eval_meany1(k,t))^2 +  (t2 - eval_meany2(k,t))^2) + eval_q_min(k,t))
+    return((t - k + 1)*((t1 - eval_meany1(k,t))^2 +  (t2 - eval_meany2(k,t))^2) + eval_q_min2(k,t))
   }
 
   costQ <- rep(0, n + 1)
@@ -115,7 +115,7 @@ plot_2D <- function(data, theta, beta = 4*length(data$y1), color = "ramp")
     min_temp <- Inf
     for(k in 1:t)
     {
-      val1 <- eval_q_min(k, t)
+      val1 <- eval_q_min2(k, t)
       if(val1 < min_temp){min_temp <- val1}
     }
     costQ[shift(t)] <- min_temp

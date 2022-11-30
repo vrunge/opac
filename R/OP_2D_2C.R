@@ -35,7 +35,7 @@ OP_2D_AC <- function(data, beta = 4 * log(nrow(data)))
   eval_meany2 <- function(j, k){return((cumy2[k+1]-cumy2[j])/(k-j+1))}
   eval_meanS <- function(j, k){return((cumyS[k+1]-cumyS[j])/(k-j+1))}
   #########
-  eval_q_min <- function(k, t) ###minimum of q_{t}^{k}, data y_{k} to y_{t}
+  eval_q_min2 <- function(k, t) ###minimum of q_{t}^{k}, data y_{k} to y_{t}
   {
     if(k == t){return(costQ[shift(k-1)] + beta)} ###costQ[shift(k)-1] = m_{k-1}
     return((t-k+1)*eval_var(k,t) + costQ[shift(k-1)] + beta)
@@ -50,7 +50,7 @@ OP_2D_AC <- function(data, beta = 4 * log(nrow(data)))
   #########
   eval_q_point <- function(k, t, t1, t2) ###value of q_{t-1}^{k}(t1,t2)
   {
-    return((t - k + 1)*((t1 - eval_meany1(k,t))^2 +  (t2 - eval_meany2(k,t))^2) + eval_q_min(k,t))
+    return((t - k + 1)*((t1 - eval_meany1(k,t))^2 +  (t2 - eval_meany2(k,t))^2) + eval_q_min2(k,t))
   }
   #########
   eval_q_0 <- function(k, t) ###minimum of q_{t}^{k}, data y_{k} to y_{t}
@@ -70,10 +70,10 @@ OP_2D_AC <- function(data, beta = 4 * log(nrow(data)))
     t2jk <- eval_meany2(j,k-1)
     D <- sqrt((t1kt - t1jk)^2 + (t2kt - t2jk)^2)
     if(D == 0){return(list(p = c(t1kt + R, t2kt),
-                           m = eval_q_min(k, t) + (t - k + 1)*R^2))}
+                           m = eval_q_min2(k, t) + (t - k + 1)*R^2))}
     s <- R/D
     return(list(p = c(s*t1kt + (1-s)*t1jk, s*t2kt + (1-s)*t2jk),
-                m =  eval_q_min(k, t) + (t - k + 1)*(D - R)^2))
+                m =  eval_q_min2(k, t) + (t - k + 1)*(D - R)^2))
   }
   #########
   eval_q_21 <- function(i, j, k, t) ###value of m_{t}^{ijk}
@@ -353,7 +353,7 @@ OP_2D_AC <- function(data, beta = 4 * log(nrow(data)))
     min_temp <- Inf
     for(k in indexSet)
     {
-      eval <- eval_q_min(k, t+1) ### find min of q_{t+1}^k
+      eval <- eval_q_min2(k, t+1) ### find min of q_{t+1}^k
       if(eval < min_temp){min_temp <- eval; index <- k}
     }
     costQ[shift(t+1)] <- min_temp # this is find m_{t+1}

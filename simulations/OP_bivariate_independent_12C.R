@@ -44,7 +44,7 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)), testMode = 0)
     return(eval_meanS(j,k) - (eval_meany1(j,k)^2 + eval_meany2(j,k)^2))
   }
   #########
-  eval_q_min <- function(k, t) ###minimum of q_{t}^{k}, data y_{k} to y_{t}
+  eval_q_min2 <- function(k, t) ###minimum of q_{t}^{k}, data y_{k} to y_{t}
   {
     if(k == t){return(costQ[shift(k-1)] + beta)} ###costQ[shift(k)-1] = m_{k-1}
     return((t - k + 1)*eval_var(k,t) + costQ[shift(k-1)] + beta)
@@ -52,7 +52,7 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)), testMode = 0)
   #########
   eval_q <- function(k, t, t1, t2) ###value of q_{t-1}^{k}(t1,t2)
   {
-    return((t - k + 1)*((t1 - eval_meany1(k,t))^2 +  (t2 - eval_meany2(k,t))^2) + eval_q_min(k,t))
+    return((t - k + 1)*((t1 - eval_meany1(k,t))^2 +  (t2 - eval_meany2(k,t))^2) + eval_q_min2(k,t))
   }
   #########
   eval_q_intersection <- function(j, k, t) ###value of m_{t}^{jk}
@@ -63,7 +63,7 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)), testMode = 0)
     t1jk <- eval_meany1(j,k-1)
     t2jk <- eval_meany2(j,k-1)
     D <- sqrt((t1kt - t1jk)^2 + (t2kt - t2jk)^2)
-    return(eval_q_min(k, t) + (t - k + 1)*(D - R)^2)
+    return(eval_q_min2(k, t) + (t - k + 1)*(D - R)^2)
   }
 
   #########  #########  #########
@@ -130,11 +130,11 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)), testMode = 0)
         t1k <- eval_meany1(k,t)
         t2k <- eval_meany2(k,t)
         ind_k <- which(indexSet == k)
-        if(eval_q_min(k, t) > eval_q(j, t, t1k, t2k)){omega_t_k[ind_k] <- max(omega_t_k[ind_k], info$m[i])}
+        if(eval_q_min2(k, t) > eval_q(j, t, t1k, t2k)){omega_t_k[ind_k] <- max(omega_t_k[ind_k], info$m[i])}
         t1j <- eval_meany1(j,t)
         t2j <- eval_meany1(j,t)
         ind_j <- which(indexSet == j)
-        if(eval_q_min(j, t) > eval_q(k, t, t1j, t2j)){omega_t_k[ind_j] <- max(omega_t_k[ind_j], info$m[i])}
+        if(eval_q_min2(j, t) > eval_q(k, t, t1j, t2j)){omega_t_k[ind_j] <- max(omega_t_k[ind_j], info$m[i])}
       }
     }
 
@@ -171,7 +171,7 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)), testMode = 0)
       j <- info$j[i]
       if(k == j)
       {
-        info$m[i] <- eval_q_min(k, t+1)
+        info$m[i] <- eval_q_min2(k, t+1)
       }
       else
       {
@@ -183,7 +183,7 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)), testMode = 0)
     ######### 2 ######### adding new 3-points with t
     ######### 2 #########
 
-    info <- rbind(info, c(t+1, t+1, eval_q_min(t+1, t+1))) #min of q_{t+1}^{t+1}
+    info <- rbind(info, c(t+1, t+1, eval_q_min2(t+1, t+1))) #min of q_{t+1}^{t+1}
 
     ######### ######### ######### TESTMODE
     ######### ######### ######### TESTMODE
@@ -219,7 +219,7 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)), testMode = 0)
     min_temp <- Inf
     for(k in indexSet)
     {
-      eval <- eval_q_min(k, t+1) ### find min of q_{t+1}^k
+      eval <- eval_q_min2(k, t+1) ### find min of q_{t+1}^k
       if(eval < min_temp){min_temp <- eval; index <- k}
     }
     costQ[shift(t+1)] <- min_temp # this is find m_{t+1}
@@ -288,7 +288,7 @@ OP_2D_2C <- function(data, beta = 4 * log(nrow(data)), testMode = 2)
     return(eval_meanS(j,k) - (eval_meany1(j,k)^2 + eval_meany2(j,k)^2))
   }
   #########
-  eval_q_min <- function(k, t) ###minimum of q_{t}^{k}, data y_{k} to y_{t}
+  eval_q_min2 <- function(k, t) ###minimum of q_{t}^{k}, data y_{k} to y_{t}
   {
     if(k == t){return(costQ[shift(k-1)] + beta)} ###costQ[shift(k)-1] = m_{k-1}
     return((t - k + 1)*eval_var(k,t) + costQ[shift(k-1)] + beta)
@@ -296,7 +296,7 @@ OP_2D_2C <- function(data, beta = 4 * log(nrow(data)), testMode = 2)
   #########
   eval_q <- function(k, t, t1, t2) ###value of q_{t-1}^{k}(t1,t2)
   {
-    return((t - k + 1)*((t1 - eval_meany1(k,t))^2 +  (t2 - eval_meany2(k,t))^2) + eval_q_min(k,t))
+    return((t - k + 1)*((t1 - eval_meany1(k,t))^2 +  (t2 - eval_meany2(k,t))^2) + eval_q_min2(k,t))
   }
   #########
   eval_q_intersection <- function(j, k, t) ###value of m_{t}^{jk}
@@ -307,7 +307,7 @@ OP_2D_2C <- function(data, beta = 4 * log(nrow(data)), testMode = 2)
     t1jk <- eval_meany1(j,k-1)
     t2jk <- eval_meany2(j,k-1)
     D <- sqrt((t1kt - t1jk)^2 + (t2kt - t2jk)^2)
-    return(eval_q_min(k, t) + (t - k + 1)*(D - R)^2)
+    return(eval_q_min2(k, t) + (t - k + 1)*(D - R)^2)
   }
   #########
   position <- function(j, k, t)
@@ -415,11 +415,11 @@ OP_2D_2C <- function(data, beta = 4 * log(nrow(data)), testMode = 2)
         t1k <- eval_meany1(k,t)
         t2k <- eval_meany2(k,t)
         ind_k <- which(indexSet == k)
-        if(eval_q_min(k, t) > eval_q(j, t, t1k, t2k)){omega_t_k[ind_k] <- max(omega_t_k[ind_k], info$m[i])}
+        if(eval_q_min2(k, t) > eval_q(j, t, t1k, t2k)){omega_t_k[ind_k] <- max(omega_t_k[ind_k], info$m[i])}
         t1j <- eval_meany1(j,t)
         t2j <- eval_meany1(j,t)
         ind_j <- which(indexSet == j)
-        if(eval_q_min(j, t) > eval_q(k, t, t1j, t2j)){omega_t_k[ind_j] <- max(omega_t_k[ind_j], info$m[i])}
+        if(eval_q_min2(j, t) > eval_q(k, t, t1j, t2j)){omega_t_k[ind_j] <- max(omega_t_k[ind_j], info$m[i])}
       }
     }
 
@@ -503,7 +503,7 @@ OP_2D_2C <- function(data, beta = 4 * log(nrow(data)), testMode = 2)
       j <- info$j[i]
       if(k == j)
       {
-        info$m[i] <- eval_q_min(k, t+1)
+        info$m[i] <- eval_q_min2(k, t+1)
       }
       else
       {
@@ -539,7 +539,7 @@ OP_2D_2C <- function(data, beta = 4 * log(nrow(data)), testMode = 2)
     ######### 2 ######### adding new 3-points with t
     ######### 2 #########
 
-    info <- rbind(info, c(t+1, t+1, eval_q_min(t+1, t+1))) #min of q_{t+1}^{t+1}
+    info <- rbind(info, c(t+1, t+1, eval_q_min2(t+1, t+1))) #min of q_{t+1}^{t+1}
 
     ######### ######### ######### TESTMODE
     ######### ######### ######### TESTMODE
@@ -594,7 +594,7 @@ OP_2D_2C <- function(data, beta = 4 * log(nrow(data)), testMode = 2)
     min_temp <- Inf
     for(k in indexSet)
     {
-      eval <- eval_q_min(k, t+1) ### find min of q_{t+1}^k
+      eval <- eval_q_min2(k, t+1) ### find min of q_{t+1}^k
       if(eval < min_temp){min_temp <- eval; index <- k}
     }
     costQ[shift(t+1)] <- min_temp # this is find m_{t+1}

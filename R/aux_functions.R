@@ -108,4 +108,67 @@ globalCost_Slope <- function(data, chpts, kinks, beta)
   return(res)
 }
 
+###############################################################
+####################### INNER FUNCTIONS #######################
+###############################################################
+
+shift <- function(k){return(k+1)}
+eval_mean <- function(v, j, k){return((v[k+1]-v[j])/(k-j+1))}
+
+#############################################
+
+eval_var <- function(cumy1, cumy2, cumyS, j, k) ###Variance for datapoint y_j to y_{k}
+{
+  if(j == k){return(0)}
+  return(eval_mean(cumyS, j,k) - (eval_mean(cumy1,j,k)^2 + eval_mean(cumy2,j,k)^2))
+}
+
+#############################################
+
+eval_q_min <- function(costQ, cumy1, cumy2, cumyS, k, t, beta) ###minimum of q_{t}^{k}, data y_{k} to y_{t}
+{
+  if(k == t){return(costQ[shift(k)-1] + beta)} ###costQ[shift(k)-1] = m_{k-1}
+  return((shift(t)-k)*eval_var(cumy1, cumy2, cumyS, k,t) + costQ[shift(k)-1] + beta)
+}
+
+#############################################
+
+eval_q <- function(costQ, cumy1, cumy2, cumyS, k, t, beta, t1, t2) ###value of q_{t-1}^{k}(t1,t2)
+{
+  return((t - k + 1)*((t1 - eval_mean(cumy1,k,t))^2 +
+                      (t2 - eval_mean(cumy2,k,t))^2) +
+           eval_q_min(costQ, cumy1, cumy2, cumyS, k, t, beta))
+}
+
+#############################################
+
+eval_q_intersection <- function(R2, costQ, cumy1, cumy2, cumyS, j, k, t, beta) ###value of m_{t}^{jk}
+{
+  R <- sqrt(R2)
+  t1kt <- eval_mean(cumy1, k, t)
+  t2kt <- eval_mean(cumy2, k, t)
+  t1jk <- eval_mean(cumy1, j, k-1)
+  t2jk <- eval_mean(cumy2, j, k-1)
+
+  D <- sqrt((t1kt - t1jk)^2 + (t2kt - t2jk)^2)
+  return(eval_q_min(costQ, cumy1, cumy2, cumyS, k, t, beta) + (t - k + 1)*(D - R)^2)
+}
+
+#############################################
+
+test_inclusion <- function(costQ, cumy1, cumy2, cumyS, j, k, t) #j < k to prune j
+{
+  Rsmall <- sqrt((costQ[shift(t-1)] - costQ[shift(j-1)])/(t-j) - eval_var(cumy1, cumy2, cumyS, j, t-1))
+  Rbig <- sqrt((costQ[shift(t-1)] - costQ[shift(k-1)])/(t-k) - eval_var(cumy1, cumy2, cumyS, k, t-1))
+
+  t1jt <- eval_mean(cumy1, j, t-1)
+  t2jt <- eval_mean(cumy2, j, t-1)
+  t1kt <- eval_mean(cumy1, k, t-1)
+  t2kt <- eval_mean(cumy2, k, t-1)
+
+  D <- sqrt((t1kt - t1jt)^2 + (t2kt - t2jt)^2)
+  return((D + Rsmall) <= Rbig)
+}
+
+
 

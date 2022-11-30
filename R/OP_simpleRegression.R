@@ -37,7 +37,7 @@ OP_Reg <- function(data, beta = 4 * log(nrow(data)))
   eval_meanXY <- function(j, k){return((cumXY[k+1]-cumXY[j])/(k-j+1))}
 
   #########
-  eval_q_min <- function(k, t) ###minimum of q_{t}^{k}, data y_{k} to y_{t}
+  eval_q_min2 <- function(k, t) ###minimum of q_{t}^{k}, data y_{k} to y_{t}
   {
     if(t == k){return(Inf)}
     t1 <- (eval_meanXY(k,t) - eval_meanX(k,t)*eval_meanY(k,t))/(eval_meanX2(k,t) - (eval_meanX(k,t))^2)
@@ -66,7 +66,7 @@ OP_Reg <- function(data, beta = 4 * log(nrow(data)))
     min_temp <- Inf
     for(k in 1:t)
     {
-      eval <- eval_q_min(k,t)
+      eval <- eval_q_min2(k,t)
       if(eval < min_temp){min_temp <- eval; index <- k}
     }
     costQ[shift(t)] <- min_temp
@@ -132,7 +132,7 @@ OP_Reg_PELT <- function(data, beta = 4 * log(nrow(data)))
   eval_meanXY <- function(j, k){return((cumXY[k+1]-cumXY[j])/(k-j+1))}
 
   #########
-  eval_q_min <- function(k, t) ###minimum of q_{t}^{k}, data y_{k} to y_{t}
+  eval_q_min2 <- function(k, t) ###minimum of q_{t}^{k}, data y_{k} to y_{t}
   {
     if(t == k){return(Inf)}
     t1 <- (eval_meanXY(k,t) - eval_meanX(k,t)*eval_meanY(k,t))/(eval_meanX2(k,t) - (eval_meanX(k,t))^2)
@@ -249,7 +249,7 @@ OP_Reg_1C <- function(data, beta = 4 * log(nrow(data)))
   eval_meanXY <- function(j, k){return((cumXY[k+1]-cumXY[j])/(k-j+1))}
 
   #########
-  eval_q_min <- function(k, t) ###minimum of q_{t}^{k}, data y_{k} to y_{t}
+  eval_q_min2 <- function(k, t) ###minimum of q_{t}^{k}, data y_{k} to y_{t}
   {
     if(t == k){return(Inf)}
     t1 <- (eval_meanXY(k,t) - eval_meanX(k,t)*eval_meanY(k,t))/(eval_meanX2(k,t) - (eval_meanX(k,t))^2)

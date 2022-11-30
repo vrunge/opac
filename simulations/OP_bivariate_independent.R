@@ -40,7 +40,7 @@ OP_2D <- function(data, beta = 4 * log(nrow(data)))
     return(eval_meanS(j,k) - (eval_meany1(j,k)^2 + eval_meany2(j,k)^2))
   }
   #########
-  eval_q_min <- function(k, t) ###minimum of q_{t}^{k}, data y_{k} to y_{t}
+  eval_q_min2 <- function(k, t) ###minimum of q_{t}^{k}, data y_{k} to y_{t}
   {
     if(k == t){return(costQ[shift(k)-1] + beta)} ###costQ[shift(k)-1] = m_{k-1}
     return((shift(t)-k)*eval_var(k,t) + costQ[shift(k)-1] + beta)
@@ -64,7 +64,7 @@ OP_2D <- function(data, beta = 4 * log(nrow(data)))
     min_temp <- Inf
     for(k in 1:t)
     {
-      eval <- eval_q_min(k,t)
+      eval <- eval_q_min2(k,t)
       if(eval < min_temp){min_temp <- eval; index <- k}
     }
     costQ[shift(t)] <- min_temp
@@ -129,7 +129,7 @@ OP_2D_PELT <- function(data, beta = 4 * log(nrow(data)))
     return(eval_meanS(j,k) - (eval_meany1(j,k)^2 + eval_meany2(j,k)^2))
   }
   #########
-  eval_q_min <- function(k, t) ###minimum of q_{t}^{k}, data y_{k} to y_{t}
+  eval_q_min2 <- function(k, t) ###minimum of q_{t}^{k}, data y_{k} to y_{t}
   {
     if(k == t){return(costQ[shift(k)-1] + beta)} ###costQ[shift(k)-1] = m_{k-1}
     return((t-k+1)*eval_var(k,t) + costQ[shift(k)-1] + beta)
@@ -155,7 +155,7 @@ OP_2D_PELT <- function(data, beta = 4 * log(nrow(data)))
     min_temp <- Inf
     for(k in indexSet)
     {
-      eval <- eval_q_min(k,t)
+      eval <- eval_q_min2(k,t)
       if(eval < min_temp){min_temp <- eval; index <- k}
     }
     costQ[shift(t)] <- min_temp
