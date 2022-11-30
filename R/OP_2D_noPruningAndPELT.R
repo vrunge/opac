@@ -35,11 +35,12 @@ OP_2D <- function(data, beta = 4 * log(nrow(data)))
 
   #########
   ###
-  ### UPDATE rule Dynamic Programming
+  ### update rule Dynamic Programming
   ###
   for(t in 1:n) # at t, transform Q_{t-1} into Q_{t}
   {
     min_temp <- Inf
+
     for(k in 1:t)
     {
       eval <- eval_q_min(costQ, cumy1, cumy2, cumyS, k, t, beta)
@@ -49,23 +50,21 @@ OP_2D <- function(data, beta = 4 * log(nrow(data)))
     cp[shift(t)] <- index - 1
   }
 
-  #########
+  ######### DDDDDDDDDDDDDDDDDDDDDD #########
   ###
   ### backtracking step
   ###
-  cp <- cp[-1] # remove first value
   changepoints <- n # vector of change-point to build
   current <- n
 
-  while(current > 1)
+  while(changepoints[1] > 0)
   {
-    pointval <- cp[current] #new last change
+    pointval <- cp[shift(current)] #new last change
     changepoints <- c(pointval, changepoints) # update vector
     current <- pointval
   }
   return(list(changepoints = changepoints[-1]))
 }
-
 
 #############################################
 ############     OP_2D_PELT    ##############

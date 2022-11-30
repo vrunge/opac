@@ -51,8 +51,8 @@ res2$changepoints
 
 
 data <- dataGenerator_2D(chpts = 5, means1 = 0, means2 = 0)
-#data[1,] = data[2,]
-#data[3,] = data[2,]
+data[1,] = data[2,]
+data[3,] = data[2,]
 res0 <- OP_2D(data, beta = 0)
 res1 <- OP_2D_PELT(data, beta = 0)
 res2 <- OP_2D_1C(data, beta = 0)
