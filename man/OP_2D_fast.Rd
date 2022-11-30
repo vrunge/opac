@@ -18,5 +18,5 @@ a list with the change-point elements (each last index of each segment)
 Optimal Partitioning algorithm for bivariate independent time series (no pruning)
 }
 \examples{
-OP_2D_fast(dataGenerator2D(chpts = c(30,100,120), means1 = c(0,5,0), means2 = c(7,1,-4)))
+OP_2D_fast(dataGenerator_2D(chpts = c(30,100,120), means1 = c(0,5,0), means2 = c(7,1,-4)))
 }

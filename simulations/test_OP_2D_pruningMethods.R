@@ -2,11 +2,11 @@
 n <- 100
 myBeta <- 1*log(n)
 v12 <- 1
-data <- dataGenerator2D(chpts = c(n),
-                        means1 = c(1),
-                        means2 = c(2),
-                        sdNoise1 = 1,
-                        sdNoise2 = 1)
+data <- dataGenerator_2D(chpts = c(n),
+                         means1 = c(1),
+                         means2 = c(2),
+                         sdNoise1 = 1,
+                         sdNoise2 = 1)
 
 plot(data$y2)
 a <- system.time(S1 <- OP_2D_1C(data = data, beta = myBeta, testMode = 0))
@@ -38,11 +38,11 @@ f[[1]]
 n <- 500
 myBeta <- 4*log(n)
 v12 <- 1
-data <- dataGenerator2D(chpts = c(n),
-                        means1 = c(1),
-                        means2 = c(2),
-                        sdNoise1 = 1,
-                        sdNoise2 = 1)
+data <- dataGenerator_2D(chpts = c(n),
+                         means1 = c(1),
+                         means2 = c(2),
+                         sdNoise1 = 1,
+                         sdNoise2 = 1)
 
 
 a <- system.time(S1 <- OP_2D_PELT(data = data, beta = myBeta))

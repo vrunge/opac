@@ -18,5 +18,5 @@ a list with the change-point elements (each last index of each segment)
 Optimal Partitioning algorithm for changes in simple regression (no pruning)
 }
 \examples{
-OP_Reg(dataGeneratorRegression(chpts = c(50,100,150), A = c(-1,1,-1), B = c(-1,1,-1)))
+OP_Reg(dataGenerator_Reg(chpts = c(50,100,150), A = c(-1,1,-1), B = c(-1,1,-1)))
 }

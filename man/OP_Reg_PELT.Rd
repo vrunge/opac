@@ -18,5 +18,5 @@ a list with the change-point elements (each last index of each segment) and a ve
 Optimal Partitioning algorithm for changes in simple regression (with PELT pruning)
 }
 \examples{
-OP_Reg_PELT(dataGeneratorRegression(chpts = c(50,100,150), A = c(-1,1,-1), B = c(-1,1,-1)))
+OP_Reg_PELT(dataGenerator_Reg(chpts = c(50,100,150), A = c(-1,1,-1), B = c(-1,1,-1)))
 }

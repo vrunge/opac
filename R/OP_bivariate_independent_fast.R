@@ -9,7 +9,7 @@
 #' @param beta penalty value
 #' @return a list with the change-point elements (each last index of each segment)
 #' @examples
-#' OP_2D_fast(dataGenerator2D(chpts = c(30,100,120), means1 = c(0,5,0), means2 = c(7,1,-4)))
+#' OP_2D_fast(dataGenerator_2D(chpts = c(30,100,120), means1 = c(0,5,0), means2 = c(7,1,-4)))
 OP_2D_fast <- function(data, beta = 4 * log(nrow(data)))
 {
   #########
@@ -101,7 +101,7 @@ OP_2D_fast <- function(data, beta = 4 * log(nrow(data)))
 #' @param beta penalty value
 #' @return a list with the change-point elements (each last index of each segment) and a vector nb counting the number of non-pruned elements at each iteration
 #' @examples
-#' OP_2D_PELT_fast(dataGenerator2D(chpts = c(30,100,120), means1 = c(0,1,0), means2 = c(7,1,-4)))
+#' OP_2D_PELT_fast(dataGenerator_2D(chpts = c(30,100,120), means1 = c(0,1,0), means2 = c(7,1,-4)))
 OP_2D_PELT_fast <- function(data, beta = 4 * log(nrow(data)))
 {
   #########

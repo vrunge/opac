@@ -20,5 +20,5 @@ a list with the change-point elements (each last index of each segment) and a ve
 Optimal Partitioning algorithm for bivariate independent time series (with OP1C algorithm)
 }
 \examples{
-OP_2D_1C(dataGenerator2D(chpts = c(30,100,120), means1 = c(0,1,0), means2 = c(7,1,-4)))
+OP_2D_1C(dataGenerator_2D(chpts = c(30,100,120), means1 = c(0,1,0), means2 = c(7,1,-4)))
 }

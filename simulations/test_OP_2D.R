@@ -32,10 +32,10 @@ abline(v = R2$changepoints, col = 2)
 ############################################################################
 
 
-n <- 100
-myBeta <- 4*log(n)
+n <- 1000
+myBeta <- 1*log(n)
 v12 <- 1
-data <- dataGenerator2D(chpts = c(n),
+data <- dataGenerator_2D(chpts = c(n),
                         means1 = c(1),
                         means2 = c(2),
                         sdNoise1 = 1,

@@ -14,7 +14,7 @@
 #' @param testMode inner pruning test modes (0 or 1)
 #' @return a list with the change-point elements (each last index of each segment) and a vector nb counting the number of non-pruned elements at each iteration
 #' @examples
-#' OP_2D_1C(dataGenerator2D(chpts = c(30,100,120), means1 = c(0,1,0), means2 = c(7,1,-4)))
+#' OP_2D_1C(dataGenerator_2D(chpts = c(30,100,120), means1 = c(0,1,0), means2 = c(7,1,-4)))
 OP_2D_1C <- function(data, beta = 4 * log(nrow(data)), testMode = 0)
 {
   #########
@@ -258,7 +258,7 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)), testMode = 0)
 #' @param testMode inner pruning test modes (0, 1 or 2)
 #' @return a list with the change-point elements (each last index of each segment) and a vector nb counting the number of non-pruned elements at each iteration
 #' @examples
-#' OP_2D_2C(dataGenerator2D(chpts = c(30,100,120), means1 = c(0,1,0), means2 = c(7,1,-4)))
+#' OP_2D_2C(dataGenerator_2D(chpts = c(30,100,120), means1 = c(0,1,0), means2 = c(7,1,-4)))
 OP_2D_2C <- function(data, beta = 4 * log(nrow(data)), testMode = 2)
 {
   #########

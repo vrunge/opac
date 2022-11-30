@@ -12,7 +12,7 @@
 #' @param beta penalty value
 #' @return a list with the change-point elements (each last index of each segment) and a vector nb counting the number of non-pruned elements at each iteration
 #' @examples
-#' OP_2D_AC(dataGenerator2D(chpts = c(30,100,120), means1 = c(0,1,0), means2 = c(7,1,-4)))
+#' OP_2D_AC(dataGenerator_2D(chpts = c(30,100,120), means1 = c(0,1,0), means2 = c(7,1,-4)))
 OP_2D_AC <- function(data, beta = 4 * log(nrow(data)))
 {
   #########

@@ -1,10 +1,11 @@
 
 
 ######################################################
-#############     dataGenerator2D    #################
+#############     dataGenerator_2D   #################
 ######################################################
 
-#' dataGenerator2D
+#' dataGenerator_2D
+#'
 #' @description Generating data for change-point detection in bivariate independent time series
 #' @param chpts a vector of increasing change-point indices
 #' @param means1 vector of successive segment means for time series 1
@@ -14,8 +15,8 @@
 #' @param type the model: gauss or poisson
 #' @return a dataframe with two simulated time series with same length in component y1 and y2
 #' @examples
-#' myData <- dataGenerator2D(chpts = c(30,100,120), means1 = c(0,5,0), means2 = c(7,1,-4))
-dataGenerator2D <- function(chpts = 100,
+#' myData <- dataGenerator_2D(chpts = c(30,100,120), means1 = c(0,5,0), means2 = c(7,1,-4))
+dataGenerator_2D <- function(chpts = 100,
                             means1 = 0,
                             means2 = 0,
                             sdNoise1 = 1,
@@ -55,11 +56,12 @@ dataGenerator2D <- function(chpts = 100,
 
 
 
-###############################################################
-#############     dataGeneratorRegression     #################
-###############################################################
+########################################################
+#############     dataGenerator_Reg    #################
+########################################################
 
-#' dataGeneratorRegression
+#' dataGenerator_Reg
+#'
 #' @description Generating data for changes in bivariate independent time series
 #' @param chpts a vector of increasing change-point indices
 #' @param A vector of regression coefficients A in A*x+B simple regression model
@@ -69,8 +71,8 @@ dataGenerator2D <- function(chpts = 100,
 #' @param sdNoise standard deviation of the Gaussian noise
 #' @return a dataframe with time series x and y for change-points in regression of type y = A*x + B + noise
 #' @examples
-#' myData <- dataGeneratorRegression(chpts = c(40,90), A = c(2,-1),  B = c(-1,2), meansX = c(1,2))
-dataGeneratorRegression <- function(chpts = 100,
+#' myData <- dataGenerator_Reg(chpts = c(40,90), A = c(2,-1),  B = c(-1,2), meansX = c(1,2))
+dataGenerator_Reg <- function(chpts = 100,
                                     A = 2,
                                     B = -1,
                                     meansX = 0,
@@ -106,10 +108,10 @@ dataGeneratorRegression <- function(chpts = 100,
 
 
 ##########################################################
-#############     dataGeneratorSlope     #################
+#############     dataGenerator_Slope    #################
 ##########################################################
 
-#' dataGeneratorSlope
+#' dataGenerator_Slope
 #' @description Generate data with a given continuous piece-wise linear model
 #' @param chpts a vector of increasing change-point indices
 #' @param kinks vector of successive kink values (kink heights)
@@ -117,8 +119,8 @@ dataGeneratorRegression <- function(chpts = 100,
 #' @param type the model: gauss or poisson
 #' @return a vector of (univariate) simulated data following the (chpts, kinks) 2D data-points.
 #' @examples
-#' myData <- dataGeneratorSlope(chpts = c(1,30,100,150), kinks = c(-2,pi,0.001,2.1), varNoise = 0.1)
-dataGeneratorSlope <- function(chpts = c(1, 100), kinks = c(1, 5), varNoise = 0.1, type = "gauss")
+#' myData <- dataGenerator_Slope(chpts = c(1,30,100,150), kinks = c(-2,pi,0.001,2.1), varNoise = 0.1)
+dataGenerator_Slope <- function(chpts = c(1, 100), kinks = c(1, 5), varNoise = 0.1, type = "gauss")
 {
   ############
   ### STOP ###

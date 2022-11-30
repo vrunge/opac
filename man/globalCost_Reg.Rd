@@ -20,7 +20,7 @@ the global cost value (minimal value for the optimization problem)
 Computing the global cost of the segmentation for linear regression problem
 }
 \examples{
-data <- dataGeneratorRegression(chpts = c(40,90), A = c(2,-1),  B = c(-1,2), meansX = c(1,2))
+data <- dataGenerator_Reg(chpts = c(40,90), A = c(2,-1),  B = c(-1,2), meansX = c(1,2))
 res <- OP_Reg(data)
 globalCost_Reg(data, res$changepoints, 4*log(nrow(data)))
 }

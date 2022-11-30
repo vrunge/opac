@@ -9,7 +9,7 @@
 #' @param beta penalty value
 #' @return a list with the change-point elements (each last index of each segment)
 #' @examples
-#' OP_Reg(dataGeneratorRegression(chpts = c(50,100,150), A = c(-1,1,-1), B = c(-1,1,-1)))
+#' OP_Reg(dataGenerator_Reg(chpts = c(50,100,150), A = c(-1,1,-1), B = c(-1,1,-1)))
 OP_Reg <- function(data, beta = 4 * log(nrow(data)))
 {
   #########
@@ -104,7 +104,7 @@ OP_Reg <- function(data, beta = 4 * log(nrow(data)))
 #' @param beta penalty value
 #' @return a list with the change-point elements (each last index of each segment) and a vector nb counting the number of non-pruned elements at each iteration
 #' @examples
-#' OP_Reg_PELT(dataGeneratorRegression(chpts = c(50,100,150), A = c(-1,1,-1), B = c(-1,1,-1)))
+#' OP_Reg_PELT(dataGenerator_Reg(chpts = c(50,100,150), A = c(-1,1,-1), B = c(-1,1,-1)))
 OP_Reg_PELT <- function(data, beta = 4 * log(nrow(data)))
 {
   #########
@@ -221,7 +221,7 @@ OP_Reg_PELT <- function(data, beta = 4 * log(nrow(data)))
 #' @param beta penalty value
 #' @return a list with the change-point elements (each last index of each segment) and a vector nb counting the number of non-pruned elements at each iteration
 #' @examples
-#' OP_Reg_1C(dataGeneratorRegression(chpts = c(50,100,150), A = c(-1,1,-1), B = c(-1,1,-1)))
+#' OP_Reg_1C(dataGenerator_Reg(chpts = c(50,100,150), A = c(-1,1,-1), B = c(-1,1,-1)))
 OP_Reg_1C <- function(data, beta = 4 * log(nrow(data)))
 {
   #########
