@@ -1,6 +1,6 @@
 
 
-data <- dataGenerator_2D(chpts = 200)
+data <- dataGenerator_2D(chpts = 1000)
 
 res1 <- OP_2D_PELT(data)
 res2 <- OP_2D_1C(data)
