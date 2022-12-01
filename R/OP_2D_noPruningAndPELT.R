@@ -43,7 +43,7 @@ OP_2D <- function(data, beta = 4 * log(nrow(data)))
 
     for(k in 1:t)
     {
-      eval <- eval_q_min(costQ, cumy1, cumy2, cumyS, k, t, beta)
+      eval <- eval2D_q_min(costQ, cumy1, cumy2, cumyS, k, t, beta)
       if(eval < min_temp){min_temp <- eval; index <- k}
     }
     costQ[shift(t)] <- min_temp
@@ -113,7 +113,7 @@ OP_2D_PELT <- function(data, beta = 4 * log(nrow(data)))
 
     for(k in indexSet)
     {
-      eval <- eval_q_min(costQ, cumy1, cumy2, cumyS, k, t, beta)
+      eval <- eval2D_q_min(costQ, cumy1, cumy2, cumyS, k, t, beta)
       if(eval < min_temp){min_temp <- eval; index <- k}
     }
     costQ[shift(t)] <- min_temp
@@ -125,13 +125,16 @@ OP_2D_PELT <- function(data, beta = 4 * log(nrow(data)))
     for(k in indexSet)
     {
       ### PRUNING STEP: reduce indexSet using the pruning test (inequality-based)
-      if(costQ[shift(t)] >= costQ[shift(k-1)] + (t-k+1)*eval_var(cumy1, cumy2, cumyS, k, t))
+      if(costQ[shift(t)] >= costQ[shift(k-1)] + (t-k+1)*eval2D_var(cumy1, cumy2, cumyS, k, t))
       {
         nonpruned <- c(nonpruned, k)
       }
     }
     indexSet <- nonpruned
     nb[t] <- length(indexSet) ### count number of elements
+    #print("zzzzzzzzzzzz")
+    #print(t)
+    #print(indexSet)
   }
 
   ######### DDDDDDDDDDDDDDDDDDDDDD #########

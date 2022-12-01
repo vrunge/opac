@@ -28,18 +28,20 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
   ###
   ### INITIALIZATION
   ###
-  costQ <- rep(0, n + 1) # costQ[i] optimal cost for data y(1) to y(i-1)
-  costQ[1] <- -beta #costQ[2] = 0
-  cp <- rep(0, n + 1) #cp vector cp[i] = index of the last change-point for data y(1) to y(i)
-  #cp[shift(1)] <- 0
-  nb <- rep(0, n) #nb element for minimization in DP
-  nrows <- rep(0, n) #nb rows in info data-frame
+  costQ <- rep(NA, n + 1) # costQ[i] optimal cost for data y(1) to y(i-1)
+  costQ[1] <- -beta
+  cp <- rep(NA, n + 1) #cp vector cp[i] = index of the last change-point for data y(1) to y(i)
+  cp[1] <- 0
+  nb <- rep(NA, n) #nb element for minimization in DP
+  nrows <- rep(NA, n) #nb rows in info data-frame
 
   info <- data.frame(matrix(ncol = 3, nrow = 0)) ### info for pruning
   colnames(info) <- c("k", "j", "m")
 
   ###result for first data-point
   indexSet <- 1 #start with q1
+  costQ[shift(1)] = 0
+  cp[shift(1)] <- 0
   info[1,] <-  c(1, 1, 0)
   nb[1] <- 1
   nrows[1] <- 1
@@ -58,14 +60,21 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
     #########
 
     ######### 1 ######### find omega_{t}^k
-    omega_t_k <- omega_t_k_fct(t, info, nrows[t],
-                               indexSet, nb[t],
-                               costQ, cumy1, cumy2, cumyS, beta)
+    omega_t <- omega_t_fct_1C(t, info, nrows[t],
+                                  indexSet, nb[t],
+                                  costQ, cumy1, cumy2, cumyS, beta)
 
     ######### 2 ######### pruning indexSet (removing pruned indices)
     nonpruned <- NULL
-    for(k in 1:nb[t]){if(omega_t_k[k] <= costQ[shift(t)] + beta){nonpruned <- c(nonpruned, indexSet[k])}}
+    for(k in 1:nb[t]){if(omega_t[k] <= costQ[shift(t)] + beta){nonpruned <- c(nonpruned, indexSet[k])}}
     indexSet <- nonpruned
+
+    #print("aaaaaaa")
+    #print(t)
+    #print(info)
+    #print(omega_t)
+    #print(indexSet)
+
 
     ######### 3 ######### pruning info (removing rows with pruned indices)
     info <- info[(info$k %in% indexSet) & (info$j %in% indexSet), ]
@@ -84,25 +93,25 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
       j <- info$j[i]
       if(j == k)
       {
-        info$m[i] <- eval_q_min(costQ, cumy1, cumy2, cumyS, k, t+1, beta)
+        info$m[i] <- eval2D_q_min(costQ, cumy1, cumy2, cumyS, k, t+1, beta)
       }
       else
       {
-        R2 <- sqrt((costQ[shift(k-1)] - costQ[shift(j-1)])/(k-j) - eval_var(cumy1, cumy2, cumyS, j, k))
-        info$m[i] <- eval_q_intersection(R2, costQ, cumy1, cumy2, cumyS, j, k, t+1, beta)
+        R2 <- (costQ[shift(k-1)] - costQ[shift(j-1)])/(k-j) - eval2D_var(cumy1, cumy2, cumyS, j, k-1)
+        info$m[i] <- eval2D_q_1_argmin(R2, costQ, cumy1, cumy2, cumyS, j, k, t+1, beta)
       }
     }
 
     ######### 2 ######### adding new 3-points with t
 
-    info <- rbind(info, c(t+1, t+1, eval_q_min(costQ, cumy1, cumy2, cumyS, t+1, t+1, beta))) #min of q_{t+1}^{t+1}
+    info <- rbind(info, c(t+1, t+1, eval2D_q_min(costQ, cumy1, cumy2, cumyS, t+1, t+1, beta))) #min of q_{t+1}^{t+1}
 
     for(j in indexSet) #m_{t+1}^(j(t+1)) optimization under one constraint solution
     {
-      R2 <- (costQ[shift(t)] - costQ[shift(j-1)])/(t+1-j) - eval_var(cumy1, cumy2, cumyS, j, t+1)
+      R2 <- (costQ[shift(t)] - costQ[shift(j-1)])/(t+1-j) - eval2D_var(cumy1, cumy2, cumyS, j, t)
       if(R2 > 0)
       {
-        info <- rbind(info, c(t+1, j, eval_q_intersection(R2, costQ, cumy1, cumy2, cumyS, j, t+1, t+1, beta)))
+        info <- rbind(info, c(t+1, j, eval2D_q_1_argmin(R2, costQ, cumy1, cumy2, cumyS, j, t+1, t+1, beta)))
       }
     }
 
@@ -112,7 +121,7 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
     nb[t+1] <- length(indexSet) ### count number of elements for DP
     nrows[t+1] <- nrow(info) ### count number of rows in info data-frame
 
-    ######### CCCCCCCCCCCCCCCCCCCCCCCCCCCc #########
+    ######### CCCCCCCCCCCCCCCCCCCCCCCCCCCC #########
     #########
     ######### STEP find the argmin, the last change-point
     #########
@@ -120,7 +129,7 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
     min_temp <- Inf
     for(k in indexSet)
     {
-      eval <- eval_q_min(costQ, cumy1, cumy2, cumyS, k, t+1, beta) ### find min of q_{t+1}^k
+      eval <- eval2D_q_min(costQ, cumy1, cumy2, cumyS, k, t+1, beta) ### find min of q_{t+1}^k
       if(eval < min_temp){min_temp <- eval; index <- k}
     }
     costQ[shift(t+1)] <- min_temp # this is m_{t+1}
