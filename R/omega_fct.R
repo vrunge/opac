@@ -53,8 +53,6 @@ omega_t_fct_2C <- function(t, info,
 {
   omega_t <-  rep(Inf, nb)
 
-
-
   ####
   #### EXPLORE all integers in indexSet
   ####
@@ -70,6 +68,7 @@ omega_t_fct_2C <- function(t, info,
     ###
     for(r in 1:nrow(info_k))
     {
+      currentIndex <- c(info_k$i[r], info_k$j[r], info_k$k[r])
       #### m ####
       if(info_k$p1[r] != Inf)
       {
@@ -79,10 +78,10 @@ omega_t_fct_2C <- function(t, info,
         covered <- FALSE
         for(s in indexSet)
         {
-          if(s != k)
+          if(!(s %in% currentIndex))
           {
             temp <- eval2D_q(costQ, cumy1, cumy2, cumyS, s, t, beta, p1, p2)
-            if(temp < m){covered <- TRUE}
+            if(temp < m){covered <- TRUE; break}
           }
         }
         if(covered == FALSE){omega_t[l] <- min(omega_t[l], m)}
@@ -97,10 +96,10 @@ omega_t_fct_2C <- function(t, info,
         covered <- FALSE
         for(s in indexSet)
         {
-          if(s != k)
+          if(!(s %in% currentIndex))
           {
             temp <- eval2D_q(costQ, cumy1, cumy2, cumyS, s, t, beta, q1, q2)
-            if(temp < M){covered <- TRUE}
+            if(temp < M){covered <- TRUE; break}
           }
         }
         if(covered == FALSE){omega_t[l] <- min(omega_t[l], M)}
@@ -118,7 +117,7 @@ omega_t_fct_2C <- function(t, info,
 
 points_toInf <- function(info, costQ, cumy1, cumy2, cumyS, t, beta)
 {
-  toTest <- which((info$i < t) & (!is.na(info$j)) & (!is.na(info$k)))
+  toTest <- which((info$k < t) & (!is.na(info$j)) & (!is.na(info$i)))
 
   for(l in toTest)
   {
@@ -147,8 +146,8 @@ points_toInf <- function(info, costQ, cumy1, cumy2, cumyS, t, beta)
       val_t_p <- eval2D_q(costQ, cumy1, cumy2, cumyS, t, t, beta, q1, q2)
       if(val_t_p < info$M[l])
       {
-        info$p1[l] <- Inf
-        info$p2[l] <- Inf
+        info$q1[l] <- Inf
+        info$q2[l] <- Inf
         info$M[l] <- Inf
       }
     }

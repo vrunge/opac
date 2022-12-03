@@ -42,7 +42,7 @@ OP_2D_AC <- function(data, beta = 4 * log(nrow(data)), testMode = 2)
   indexSet <- 1 #start with q1
   costQ[shift(1)] = 0
   cp[shift(1)] <- 0
-  info[1,] <-  c(1, NA, NA, 0, y1[1], y2[1], TRUE)
+  info[1,] <-  c(1, NA, NA, 0, y1[1], y2[1], 1)
   nb[1] <- 1
   nrows[1] <- 1
 
@@ -62,7 +62,7 @@ OP_2D_AC <- function(data, beta = 4 * log(nrow(data)), testMode = 2)
     ######### 1 ######### find omega_{t}^k
 
     omega_t <- rep(Inf, nb[t])
-    infoSurface <- info[info$surface == T,]
+    infoSurface <- info[info$surface >= 1,]
     for(i in 1:nb[t])
     {
       l <- indexSet[i]
@@ -102,26 +102,38 @@ OP_2D_AC <- function(data, beta = 4 * log(nrow(data)), testMode = 2)
       j <- info$j[l]
       i <- info$i[l]
 
-      if(is.na(j))
+      if(is.na(j))  #update surface later
       {
         res <- eval2D_q_0(costQ, cumy1, cumy2, cumyS, k, t+1, beta)
         info$p1[l] <- res$p[1]
         info$p2[l] <- res$p[2]
         info$m[l] <- res$m
       }
-      if((!is.na(j)) & is.na(i))
+      if((!is.na(j)) & is.na(i)) #update surface later
       {
         res <- eval2D_q_1(costQ, cumy1, cumy2, cumyS, j, k, t+1, beta)
         info$p1[l] <- res$p[1]
         info$p2[l] <- res$p[2]
         info$m[l] <- res$m
       }
-      if((!is.na(j)) & (!is.na(i)))
+      if((!is.na(j)) & (!is.na(i))) ### update only the argmin
       {
-        res1 <- eval2D_q_21(costQ, cumy1, cumy2, cumyS, i, j, k, t+1, beta) #function returning only = ???
-        res2 <- eval2D_q_22(costQ, cumy1, cumy2, cumyS, i, j, k, t+1, beta) #function returning only = ???
-        info$m[l] <- res1$m
-        info$M[l] <- res2$m
+        if(info$surface[l] == 1)
+        {
+          res <- eval2D_q_21(costQ, cumy1, cumy2, cumyS, i, j, k, t+1, beta)
+          info$m[l] <- res$m
+          ### ### ### ### ### testing against new t+1 (delete later) ### ### ### ### ###
+          testValue <- eval2D_q(costQ, cumy1, cumy2, cumyS, t+1, t+1, beta, info$p1[l], info$p2[l])
+          if(testValue < info$m[l]){info$surface[l] <- 0} ### to remove in cleaning step
+        }
+        if(info$surface[l] == 2)
+        {
+          res <- eval2D_q_22(costQ, cumy1, cumy2, cumyS, i, j, k, t+1, beta)
+          info$m[l] <- res$m
+          ### ### ### ### ### testing against new t+1 (delete later) ### ### ### ### ###
+          testValue <- eval2D_q(costQ, cumy1, cumy2, cumyS, t+1, t+1, beta, info$p1[l], info$p2[l])
+          if(testValue < info$m[l]){info$surface[l] <- 0} ###  to remove in cleaning step
+        }
       }
     }
 
@@ -131,68 +143,134 @@ OP_2D_AC <- function(data, beta = 4 * log(nrow(data)), testMode = 2)
     #########
     #########
 
-    #new quadratics in t+1 (always on the surface)
+    ### ### ### new quadratics in t+1 (always on the surface)
+
     temp <- eval2D_q_0(costQ, cumy1, cumy2, cumyS, t+1, t+1, beta)
-    info <- rbind(info, c(t+1, NA, NA, temp$m, temp$p[1], temp$p[2], TRUE))
+    info <- rbind(info, c(t+1, NA, NA, temp$m, temp$p[1], temp$p[2], 1)) #update surface later
 
-
-
-
-
-
-
-
-
-    #testValue <- eval2D_q(costQ, cumy1, cumy2, cumyS, t+1, t+1, beta, res$p[1], res$p[2])
-    #if(testValue < res$m){info$surface[l] <- FALSE}else{info$surface[l] <- TRUE}
-
-    for(j in indexSet) #m_{t+1}^(j(t+1)) optimization under one constraint
+    ### ### ### new triple intersection point with  t+1 (always on the surface)
+    seen_indices <- NULL
+    for(j in indexSet)
     {
-      temp <- eval2D_q_1(costQ, cumy1, cumy2, cumyS, j, t+1, t+1, beta)
-      info <- rbind(info, c(t+1, j, NA, temp$m, temp$p[1], temp$p[2]))
-
-      for(i in indexSet) #m_{t+1}^(ij(t+1)) optimization under two constraint
+      for(i in indexSet)
       {
-        if(i< j)
+        if((i < j) & eval2D_circleIntersection_ijk(costQ, cumy1, cumy2, cumyS, i, j, t+1))
         {
           temp1 <- eval2D_q_21(costQ, cumy1, cumy2, cumyS, i, j, t+1, t+1, beta)
           temp2 <- eval2D_q_22(costQ, cumy1, cumy2, cumyS, i, j, t+1, t+1, beta)
-          if((temp1$p[1] != Inf) | (temp1$p[1] != Inf))
+          surface1 <- 1
+          surface2 <- 2
+          ########## COVERING TEST ##########
+          for(l in indexSet)
           {
-            info <- rbind(info, c(t+1, j, i,
-                                  temp1$m, temp1$p[1], temp1$p[2]))
-            info <- rbind(info, c(t+1, j, i,
-                                  temp2$m,temp2$p[1], temp2$p[2]))
+            if((l != i) & (l != j))
+            {
+              testValue <- eval2D_q(costQ, cumy1, cumy2, cumyS, l, t+1, beta, temp1$p[1], temp1$p[2])
+              if (testValue < temp1$m){surface1 <- 0}
+              testValue <- eval2D_q(costQ, cumy1, cumy2, cumyS, l, t+1, beta, temp2$p[1], temp2$p[2])
+              if (testValue < temp2$m){surface2 <- 0}
+            }
           }
+          if(surface1 == 1)
+          {
+            info <- rbind(info, c(t+1, j, i, temp1$m, temp1$p[1], temp1$p[2], 1))
+            seen_indices <- unique(c(seen_indices, i, j))
+          }
+          if(surface2 == 2)
+          {
+            info <- rbind(info, c(t+1, j, i, temp2$m, temp2$p[1], temp2$p[2], 2))
+            seen_indices <- unique(c(seen_indices, i, j))
+          }
+          #both  surface visible
         }
       }
     }
 
-    ###
-    ###
-    ### NETTOYAGE
-    ###
-    ###
+    ### ### ### new intersection i with t+1 (seen in triple ij(t+1) points on the surface)
+    for(i in seen_indices)
+    {
+      temp <- eval2D_q_1(costQ, cumy1, cumy2, cumyS, i, t+1, t+1, beta)
+      info <- rbind(info, c(t+1, i, NA, temp$m, temp$p[1], temp$p[2], 1)) #update surface later
+    }
 
+    ### ### ### unseen indices really unseen ?
+    un_seen_indices <- setdiff(indexSet, seen_indices)
+    #for(i in un_seen_indices)
+    for(i in indexSet)
+    {
+      isOnSurface <- TRUE
+      temp <- eval2D_q_1(costQ, cumy1, cumy2, cumyS, i, t+1, t+1, beta)
 
+      for(j in indexSet)
+      {
+        if(j != i)
+        {
+          testValue <- eval2D_q(costQ, cumy1, cumy2, cumyS, j, t+1, beta, temp$p[1], temp$p[2])
+          if(testValue < temp$m) # i is hidden by j
+          {
+            isOnSurface <- FALSE
+            break
+          }
+        }
+      }
+      if(isOnSurface == TRUE)
+      {
+        info <- rbind(info, c(t+1, i, NA, temp$m, temp$p[1], temp$p[2], 1)) #update surface later
+      }
+    }
 
-
-
-
-
-
-
-
-
-
-
-
+    #####
+    ##### cleaning
+    #####
+    #UnseentriplePoints <- (!is.na(info$j)) & (!is.na(info$i)) & (info$surface == 0)
+    #info <- info[!UnseentriplePoints,]
 
     ### add new index t
     indexSet <- c(indexSet, t+1)
 
-    nb[t+1] <- length(indexSet) ### count number of elements for DP
+    #####
+    ##### UPDATE status SURFACE !!! for all q_0 and q_1
+    #####
     nrows[t+1] <- nrow(info) ### count number of rows in info data-frame
+
+    for(l in 1:nrows[t+1])
+    {
+      k <- info$k[l]
+      j <- info$j[l]
+      i <- info$i[l]
+      ### ### ### ### ### ### ### ### ### ###
+      if((is.na(j)) & (is.na(i)))
+      {
+        seen_surface <- 1
+        for(r in indexSet)
+        {
+          if(k != r)
+          {
+            testValue <- eval2D_q(costQ, cumy1, cumy2, cumyS, r, t+1, beta, info$p1[l], info$p2[l])
+            if(testValue < info$m[l]){seen_surface <- 0; break}
+          }
+        }
+        if(seen_surface == 0){info$surface[l] <- 0}else{info$surface[l] <- 1}
+      }
+      ### ### ### ### ### ### ### ### ### ###
+      if((!is.na(j)) & (is.na(i)))
+      {
+        seen_surface <- 1
+        for(r in indexSet)
+        {
+          if((k != r) & (j != r))
+          {
+            testValue <- eval2D_q(costQ, cumy1, cumy2, cumyS, r, t+1, beta, info$p1[l], info$p2[l])
+            if(testValue < info$m[l]){seen_surface <- 0; break}
+          }
+        }
+        if(seen_surface == 0){info$surface[l] <- 0}else{info$surface[l] <- 1}
+      }
+      ### ### ### ### ### ### ### ### ### ###
+    }
+
+    nb[t+1] <- length(indexSet) ### count number of elements for DP
+    #rows[t+1] <- nrow(info) ### count number of rows in info data-frame
 
     ######### CCCCCCCCCCCCCCCCCCCCCCCCCCCC #########
     #########

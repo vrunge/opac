@@ -62,7 +62,6 @@ OP_2D_2C <- function(data, beta = 4 * log(nrow(data)), testMode = 2)
     #########
 
     ######### 1 ######### find omega_{t}^k
-
     omega_t <- omega_t_fct_2C(t, info,
                               indexSet, nb[t],
                               costQ, cumy1, cumy2, cumyS, beta)
@@ -82,7 +81,7 @@ OP_2D_2C <- function(data, beta = 4 * log(nrow(data)), testMode = 2)
     prunedByPosition <- (info$p1 == Inf) & (info$q1 == Inf) ### unseen
     info <- info[((info$k %in% indexSet) &
                 (info$j %in% c(indexSet, NA)) &
-                (info$i %in% c(indexSet,NA))) &
+                (info$i %in% c(indexSet, NA))) &
                 (!prunedByPosition)  , ]
 
     nrows[t+1] <- nrow(info) ### count number of rows in info data-frame (update later again)
@@ -122,14 +121,14 @@ OP_2D_2C <- function(data, beta = 4 * log(nrow(data)), testMode = 2)
         {
           info$p1[l] <- res1$p[1]
           info$p2[l] <- res1$p[2]
+          info$m[l] <- res1$m
         }
-        if(res1$p[1] != Inf) #update if point is seen
+        if(res2$p[1] != Inf) #update if point is seen
         {
           info$q1[l] <- res2$p[1]
           info$q2[l] <- res2$p[2]
+          info$M[l] <- res2$m
         }
-        info$m[l] <- res1$m
-        info$M[l] <- res2$m
       }
     }
 
@@ -148,11 +147,12 @@ OP_2D_2C <- function(data, beta = 4 * log(nrow(data)), testMode = 2)
 
       for(i in indexSet) #m_{t+1}^(ij(t+1)) optimization under two constraint
       {
-        if(i< j)
+        if((i< j) & eval2D_circleIntersection_ijk(costQ, cumy1, cumy2, cumyS, i, j, t+1))
         {
           temp1 <- eval2D_q_21(costQ, cumy1, cumy2, cumyS, i, j, t+1, t+1, beta)
           temp2 <- eval2D_q_22(costQ, cumy1, cumy2, cumyS, i, j, t+1, t+1, beta)
-          if((temp1$p[1] != Inf) | (temp1$p[1] != Inf))
+
+          if((temp1$p[1] != Inf) | (temp2$p[1] != Inf))
           {
             info <- rbind(info, c(t+1, j, i,
                                 temp1$m, temp2$m,
