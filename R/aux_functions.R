@@ -68,7 +68,8 @@ eval2D_q_1_argmin <- function(R2, costQ, cumy1, cumy2, cumyS, j, k, t, beta) ###
 ##########################################################################################
 ##########################################################################################
 
-#########
+#############################################
+
 eval2D_q_0 <- function(costQ, cumy1, cumy2, cumyS, k, t, beta) ###minimum of q_{t}^{k}, data y_k to y_t
 {
   if(k == t){return(list(p = c(eval_mean(cumy1, k, t),eval_mean(cumy2, k, t)),
@@ -77,8 +78,8 @@ eval2D_q_0 <- function(costQ, cumy1, cumy2, cumyS, k, t, beta) ###minimum of q_{
               m = (t - k + 1)*eval2D_var(cumy1, cumy2, cumyS, k, t) + costQ[shift(k-1)] + beta))
 }
 
+#############################################
 
-#########
 eval2D_q_1 <- function(costQ, cumy1, cumy2, cumyS, j, k, t, beta) ###value of m_{t}^{jk}
 {
   R2 <- (costQ[shift(k-1)] - costQ[shift(j-1)])/(k-j) - eval2D_var(cumy1, cumy2, cumyS, j, k-1)
@@ -113,8 +114,8 @@ eval2D_q_1 <- function(costQ, cumy1, cumy2, cumyS, j, k, t, beta) ###value of m_
   }
 }
 
+#############################################
 
-#########
 eval2D_q_21 <- function(costQ, cumy1, cumy2, cumyS, i, j, k, t, beta) ###value of m_{t}^{ijk}
 {
   Ri2 <- (costQ[shift(k-1)] - costQ[shift(i-1)])/(k-i) - eval2D_var(cumy1, cumy2, cumyS, i, k-1)
@@ -147,7 +148,8 @@ eval2D_q_21 <- function(costQ, cumy1, cumy2, cumyS, i, j, k, t, beta) ###value o
   return(list(p = c(t1A, t2A), m = res))
 }
 
-#########
+#############################################
+
 eval2D_q_22 <- function(costQ, cumy1, cumy2, cumyS, i, j, k, t, beta) ###value of m_{t}^{ijk}
 {
   Ri2 <- (costQ[shift(k-1)] - costQ[shift(i-1)])/(k-i) - eval2D_var(cumy1, cumy2, cumyS, i, k-1)
@@ -179,8 +181,8 @@ eval2D_q_22 <- function(costQ, cumy1, cumy2, cumyS, i, j, k, t, beta) ###value o
   return(list(p = c(t1B, t2B), m = res))
 }
 
+#############################################
 
-#########
 eval2D_circleIntersection_ijk <- function(costQ, cumy1, cumy2, cumyS, i, j, k)
 {
   Ri2 <- (costQ[shift(k-1)] - costQ[shift(i-1)])/(k-i) - eval2D_var(cumy1, cumy2, cumyS, i, k-1)
@@ -196,16 +198,5 @@ eval2D_circleIntersection_ijk <- function(costQ, cumy1, cumy2, cumyS, i, j, k)
   if((D > Ri + Rj) | (D < abs(Ri - Rj))){return(FALSE)}
   return(TRUE)
 }
-
-
-#############################################
-#############################################
-############         Reg         ############
-#############################################
-#############################################
-
-
-
-
 
 

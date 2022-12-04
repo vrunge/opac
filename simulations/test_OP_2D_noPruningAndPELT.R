@@ -2,6 +2,7 @@
 
 data <- dataGenerator_2D(chpts = c(30,100,120), means1 = c(0,5,0), means2 = c(7,1,-4))
 
+
 4*log(120)
 
 OP_2D(data, beta = 1)

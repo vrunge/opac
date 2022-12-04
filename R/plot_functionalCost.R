@@ -143,14 +143,5 @@ plot_2D <- function(data, theta, beta = 4*length(data$y1), color = "ramp")
 
 
 
-######################################################
-#############     plot_Regression    #################
-######################################################
-
-plot_Regression <- function(data, theta, beta = 4*length(data$y1), color = "ramp")
-{
-
-}
-
 
 

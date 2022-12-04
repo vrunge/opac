@@ -1,28 +1,30 @@
 
-
 ############################################
-#############     OP_2D    #################
+#############     OP_Reg    ################
 ############################################
 
-#' OP_2D
-#' @description Optimal Partitioning algorithm for bivariate independent time series (no pruning)
-#' @param data a dataframe with two components: y1 and y2, time series of same length
+#' OP_Reg
+#'
+#' @description Optimal Partitioning algorithm for changes in simple regression (no pruning)
+#' @param data a data-frame with two components: x and y, time series of same length
 #' @param beta penalty value
 #' @return a list with the change-point elements (each last index of each segment)
 #' @examples
-#' OP_2D(dataGenerator_2D(chpts = c(30,100,120), means1 = c(0,5,0), means2 = c(7,1,-4)))
-OP_2D <- function(data, beta = 4 * log(nrow(data)))
+#' OP_Reg(dataGenerator_Reg(chpts = c(50,100,150), A = c(-1,1,-1), B = c(-1,1,-1)))
+OP_Reg <- function(data, beta = 4 * log(nrow(data)))
 {
   #########
   ###
   ### DATA preprocessing
   ###
-  y1 <- data$y1
-  y2 <- data$y2
-  n <- length(y1)
-  cumy1 <- cumsum(c(0, y1))
-  cumy2 <- cumsum(c(0, y2))
-  cumyS <- cumsum(c(0, y1^2 + y2^2))
+  x <- data$x
+  y <- data$y
+  n <- length(y)
+  cumX <- cumsum(c(0, x))
+  cumY <- cumsum(c(0, y))
+  cumXY <- cumsum(c(0, x*y))
+  cumSX <- cumsum(c(0, x^2))
+  cumSY <- cumsum(c(0, y^2))
 
   #########
   ###
@@ -31,11 +33,11 @@ OP_2D <- function(data, beta = 4 * log(nrow(data)))
   cp <- rep(0, n + 1) #cp vector cp[k] = index of the last change-point for data y(1) to y(k-1)
   costQ <- rep(0, n + 1) # costQ[k] optimal cost for data y(1) to y(k-1)
   costQ[1] <- -beta
-  index <- 0 #best index (to be found) for last change-point
+  index <- 1 #best index (to be found) for last change-point
 
   #########
   ###
-  ### update rule Dynamic Programming
+  ### UPDATE rule Dynamic Programming
   ###
   for(t in 1:n) # at t, transform Q_{t-1} into Q_{t}
   {
@@ -43,7 +45,7 @@ OP_2D <- function(data, beta = 4 * log(nrow(data)))
 
     for(k in 1:t)
     {
-      eval <- eval2D_q_min(costQ, cumy1, cumy2, cumyS, k, t, beta)
+      eval <- evalReg_q_min(costQ, cumX, cumY, cumXY, cumSX, cumSY, k, t, beta)
       if(eval < min_temp){min_temp <- eval; index <- k}
     }
     costQ[shift(t)] <- min_temp
@@ -66,29 +68,32 @@ OP_2D <- function(data, beta = 4 * log(nrow(data)))
   return(list(changepoints = changepoints[-1]))
 }
 
-#############################################
-############     OP_2D_PELT    ##############
-#############################################
 
-#' OP_2D_PELT
-#' @description Optimal Partitioning algorithm for bivariate independent time series (with PELT pruning)
-#' @param data a dataframe with two components: y1 and y2, time series of same length
+#################################################
+#############     OP_Reg_PELT    ################
+#################################################
+
+#' OP_Reg_PELT
+#' @description Optimal Partitioning algorithm for changes in simple regression (with PELT pruning)
+#' @param data a data-frame with two components: x and y, time series of same length
 #' @param beta penalty value
 #' @return a list with the change-point elements (each last index of each segment) and a vector nb counting the number of non-pruned elements at each iteration
 #' @examples
-#' OP_2D_PELT(dataGenerator_2D(chpts = c(30,100,120), means1 = c(0,1,0), means2 = c(7,1,-4)))
-OP_2D_PELT <- function(data, beta = 4 * log(nrow(data)))
+#' OP_Reg_PELT(dataGenerator_Reg(chpts = c(50,100,150), A = c(-1,1,-1), B = c(-1,1,-1)))
+OP_Reg_PELT <- function(data, beta = 4 * log(nrow(data)))
 {
   #########
   ###
   ### DATA preprocessing
   ###
-  y1 <- data$y1
-  y2 <- data$y2
-  n <- length(y1)
-  cumy1 <- cumsum(c(0, y1))
-  cumy2 <- cumsum(c(0, y2))
-  cumyS <- cumsum(c(0, y1^2 + y2^2))
+  x <- data$x
+  y <- data$y
+  n <- length(y)
+  cumX <- cumsum(c(0, x))
+  cumY <- cumsum(c(0, y))
+  cumXY <- cumsum(c(0, x*y))
+  cumSX <- cumsum(c(0, x^2))
+  cumSY <- cumsum(c(0, y^2))
 
   #########
   ###
@@ -97,23 +102,20 @@ OP_2D_PELT <- function(data, beta = 4 * log(nrow(data)))
   cp <- rep(0, n + 1) #cp vector cp[k] = index of the last change-point for data y(1) to y(k-1)
   costQ <- rep(0, n + 1) # costQ[k] optimal cost for data y(1) to y(k-1)
   costQ[1] <- -beta
-
   nb <- rep(0, n) #nb element for minimization in DP
-  indexSet <- NULL
+  indexSet <- 1
 
   #########
   ###
-  ### update rule Dynamic Programming
+  ### UPDATE rule Dynamic Programming
   ###
-  for(t in 1:n) # at t, transform Q_{t-1} into Q_{t}
+  for(t in 1:n)
   {
-    indexSet <- c(indexSet, t) #add new test point
-
     min_temp <- Inf
-
+    index <- 1
     for(k in indexSet)
     {
-      eval <- eval2D_q_min(costQ, cumy1, cumy2, cumyS, k, t, beta)
+      eval <- evalReg_q_min(costQ, cumX, cumY, cumXY, cumSX, cumSY, k, t, beta)
       if(eval < min_temp){min_temp <- eval; index <- k}
     }
     costQ[shift(t)] <- min_temp
@@ -124,13 +126,14 @@ OP_2D_PELT <- function(data, beta = 4 * log(nrow(data)))
     nonpruned <- NULL
     for(k in indexSet)
     {
-      ### PRUNING STEP: reduce indexSet using the pruning test (inequality-based)
-      if(costQ[shift(t)] > costQ[shift(k-1)] + (t-k+1)*eval2D_var(cumy1, cumy2, cumyS, k, t))
+      ### PRUNING STEP: reduce indexSet using the pruning test (inquality-based)
+      ### strict ">" is better (for pruning)
+      if(costQ[shift(t)] > costQ[k] + evalReg_segment_kt(cumX, cumY, cumXY, cumSX, cumSY, k, t))
       {
         nonpruned <- c(nonpruned, k)
       }
     }
-    indexSet <- nonpruned
+    indexSet <- c(nonpruned, t+1) #add new point
     nb[t] <- length(indexSet) ### count number of elements
   }
 
@@ -149,3 +152,4 @@ OP_2D_PELT <- function(data, beta = 4 * log(nrow(data)))
   }
   return(list(changepoints = changepoints[-1],  nb = nb))
 }
+
