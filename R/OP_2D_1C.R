@@ -98,7 +98,7 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
       else
       {
         R2 <- (costQ[shift(k-1)] - costQ[shift(j-1)])/(k-j) - eval2D_var(cumy1, cumy2, cumyS, j, k-1)
-        info$m[i] <- eval2D_q_1_argmin(R2, costQ, cumy1, cumy2, cumyS, j, k, t+1, beta)
+        info$m[i] <- eval2D_q_1_min(R2, costQ, cumy1, cumy2, cumyS, j, k, t+1, beta)
       }
     }
 
@@ -111,7 +111,7 @@ OP_2D_1C <- function(data, beta = 4 * log(nrow(data)))
       R2 <- (costQ[shift(t)] - costQ[shift(j-1)])/(t+1-j) - eval2D_var(cumy1, cumy2, cumyS, j, t)
       if(R2 > 0)
       {
-        info <- rbind(info, c(t+1, j, eval2D_q_1_argmin(R2, costQ, cumy1, cumy2, cumyS, j, t+1, t+1, beta)))
+        info <- rbind(info, c(t+1, j, eval2D_q_1_min(R2, costQ, cumy1, cumy2, cumyS, j, t+1, t+1, beta)))
       }
     }
 

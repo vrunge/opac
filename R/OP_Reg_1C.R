@@ -29,10 +29,10 @@ OP_Reg_1C <- function(data, beta = 4 * log(nrow(data)))
   ###
   ### INITIALIZATION
   ###
-  costQ <- rep(NA, n + 1) # costQ[k] optimal cost for data y(1) to y(k-1)
-  costQ[1] <- -beta
   cp <- rep(NA, n + 1) #cp vector cp[k] = index of the last change-point for data y(1) to y(k)
   cp[1] <- 0
+  costQ <- rep(NA, n + 1) # costQ[k] optimal cost for data y(1) to y(k-1)
+  costQ[1] <- -beta
   nb <- rep(NA, n) #nb element for minimization in DP
   nrows <- rep(NA, n) #nb rows in info data-frame
 
@@ -41,7 +41,7 @@ OP_Reg_1C <- function(data, beta = 4 * log(nrow(data)))
 
   ###result for first data-point
   indexSet <- 1 #start with q1
-  costQ[shift(1)] = 0
+  costQ[shift(1)] <- Inf #no change point at position 1
   cp[shift(1)] <- 0
   info[1,] <-  c(1, 1, 0)
   nb[1] <- 1
@@ -89,13 +89,13 @@ OP_Reg_1C <- function(data, beta = 4 * log(nrow(data)))
       if(j == k)
       {
         # # # # CHANGE # # # #
-        #info$m[i] <- eval2D_q_min(costQ, cumy1, cumy2, cumyS, k, t+1, beta)
+        info$m[i] <- evalReg_q_min(costQ, cumX, cumY, cumXY, cumSX, cumSY, k, t+1, beta)
       }
       else
       {
         # # # # CHANGE # # # #
         #R2 <- (costQ[shift(k-1)] - costQ[shift(j-1)])/(k-j) - eval2D_var(cumy1, cumy2, cumyS, j, k-1)
-        #info$m[i] <- eval2D_q_1_argmin(R2, costQ, cumy1, cumy2, cumyS, j, k, t+1, beta)
+        #info$m[i] <- eval2D_q_1_min(R2, costQ, cumy1, cumy2, cumyS, j, k, t+1, beta)
       }
     }
 
@@ -111,7 +111,7 @@ OP_Reg_1C <- function(data, beta = 4 * log(nrow(data)))
       #if(R2 > 0)
       {
         # # # # CHANGE # # # #
-        #info <- rbind(info, c(t+1, j, eval2D_q_1_argmin(R2, costQ, cumy1, cumy2, cumyS, j, t+1, t+1, beta)))
+        #info <- rbind(info, c(t+1, j, eval2D_q_1_min(R2, costQ, cumy1, cumy2, cumyS, j, t+1, t+1, beta)))
       }
     }
 

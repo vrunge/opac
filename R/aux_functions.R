@@ -40,7 +40,7 @@ eval2D_q <- function(costQ, cumy1, cumy2, cumyS, k, t, beta, t1, t2) ###value of
 
 #############################################
 
-eval2D_q_1_argmin <- function(R2, costQ, cumy1, cumy2, cumyS, j, k, t, beta) ###value of m_{t}^{jk}
+eval2D_q_1_min <- function(R2, costQ, cumy1, cumy2, cumyS, j, k, t, beta) ###value of m_{t}^{jk}
 {
   R <- sqrt(R2)
   t1jt <- eval_mean(cumy1, j, t)

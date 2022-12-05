@@ -128,7 +128,7 @@ OP_Reg_PELT <- function(data, beta = 4 * log(nrow(data)))
     {
       ### PRUNING STEP: reduce indexSet using the pruning test (inquality-based)
       ### strict ">" is better (for pruning)
-      if(costQ[shift(t)] > costQ[k] + evalReg_segment_kt(cumX, cumY, cumXY, cumSX, cumSY, k, t))
+      if(costQ[shift(t)] >= costQ[shift(k-1)] + evalReg_segment_kt(cumX, cumY, cumXY, cumSX, cumSY, k, t))
       {
         nonpruned <- c(nonpruned, k)
       }
