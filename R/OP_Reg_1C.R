@@ -43,7 +43,7 @@ OP_Reg_1C <- function(data, beta = 4 * log(nrow(data)))
   indexSet <- 1 #start with q1
   costQ[shift(1)] <- Inf #no change point at position 1
   cp[shift(1)] <- 0
-  info[1,] <-  c(1, 1, 0)
+  info[1,] <-  c(1, 1, Inf) #cost of one point = Inf for simple regression
   nb[1] <- 1
   nrows[1] <- 1
 
@@ -61,14 +61,15 @@ OP_Reg_1C <- function(data, beta = 4 * log(nrow(data)))
     #########
 
     ######### 1 ######### find omega_{t}^k
-    #omega_t <- omega_t_fct_1C(t, info, nrows[t],
-    #                          indexSet, nb[t],
-    #                          costQ, cumy1, cumy2, cumyS, beta)
+
+    omega_t <-  omega_t_Reg_fct_1C(t, info, nrows[t],
+                                   indexSet, nb[t],
+                                   costQ, cumX, cumY, cumXY, cumSX, cumSY, beta)
 
     ######### 2 ######### pruning indexSet (removing pruned indices)
-    #nonpruned <- NULL
-    #for(k in 1:nb[t]){if(omega_t[k] <= costQ[shift(t)] + beta){nonpruned <- c(nonpruned, indexSet[k])}}
-    #indexSet <- nonpruned
+    nonpruned <- NULL
+    for(k in 1:nb[t]){if((omega_t[k] <= costQ[shift(t)] + beta) | (omega_t[k] == Inf)){nonpruned <- c(nonpruned, indexSet[k])}}
+    indexSet <- nonpruned
 
 
     ######### 3 ######### pruning info (removing rows with pruned indices)
@@ -88,30 +89,28 @@ OP_Reg_1C <- function(data, beta = 4 * log(nrow(data)))
       j <- info$j[i]
       if(j == k)
       {
-        # # # # CHANGE # # # #
         info$m[i] <- evalReg_q_min(costQ, cumX, cumY, cumXY, cumSX, cumSY, k, t+1, beta)
       }
       else
       {
-        # # # # CHANGE # # # #
-        #R2 <- (costQ[shift(k-1)] - costQ[shift(j-1)])/(k-j) - eval2D_var(cumy1, cumy2, cumyS, j, k-1)
-        #info$m[i] <- eval2D_q_1_min(R2, costQ, cumy1, cumy2, cumyS, j, k, t+1, beta)
+        info$m[i] <- evalReg_q_1_min(costQ, cumX, cumY, cumXY, cumSX, cumSY, j, k, t+1, beta)
       }
     }
 
     ######### 2 ######### adding new 3-points with t
 
-    # # # # CHANGE # # # #
-    #info <- rbind(info, c(t+1, t+1, eval2D_q_min(costQ, cumy1, cumy2, cumyS, t+1, t+1, beta))) #min of q_{t+1}^{t+1}
+    info <- rbind(info, c(t+1, t+1, Inf)) #min of q_{t+1}^{t+1} no segment of length 1
 
     for(j in indexSet) #m_{t+1}^(j(t+1)) optimization under one constraint solution
     {
-      # # # # CHANGE # # # #
-      #R2 <- (costQ[shift(t)] - costQ[shift(j-1)])/(t+1-j) - eval2D_var(cumy1, cumy2, cumyS, j, t)
-      #if(R2 > 0)
+      coeffj <- ellipseCoeff(costQ, cumX, cumY, cumXY, cumSX, cumSY, j, t+1, beta)
+      coefft <- ellipseCoeff(costQ, cumX, cumY, cumXY, cumSX, cumSY, t+1, t+1, beta)
+      coeff1C <- coeffj - coefft
+
+      if(isAnEllipse(coeff1C) == TRUE)
       {
-        # # # # CHANGE # # # #
-        #info <- rbind(info, c(t+1, j, eval2D_q_1_min(R2, costQ, cumy1, cumy2, cumyS, j, t+1, t+1, beta)))
+        #info <- rbind(info, c(t+1, j, Inf))
+        info <- rbind(info, c(t+1, j, evalReg_q_1_min(costQ, cumX, cumY, cumXY, cumSX, cumSY, j, t+1, t+1, beta)))
       }
     }
 
@@ -126,6 +125,7 @@ OP_Reg_1C <- function(data, beta = 4 * log(nrow(data)))
     ######### STEP find the argmin, the last change-point
     #########
 
+    #print(info)
 
     min_temp <- Inf
     for(k in indexSet)
@@ -138,6 +138,8 @@ OP_Reg_1C <- function(data, beta = 4 * log(nrow(data)))
 
   }
 
+  #print("costQcostQcostQcostQcostQcostQcostQcostQcostQcostQcostQcostQcostQcostQ")
+  #print(costQ)
   ######### DDDDDDDDDDDDDDDDDDDDDD #########
   ###
   ### backtracking step
@@ -154,4 +156,5 @@ OP_Reg_1C <- function(data, beta = 4 * log(nrow(data)))
 
   return(list(changepoints = changepoints[-1],  nb = nb, nrows = nrows))
 }
+
 

@@ -24,7 +24,7 @@ omega_t_fct_1C <- function(t, info, nrows,
       t1k <- eval_mean(cumy1, k, t)
       t2k <- eval_mean(cumy2, k, t)
       ind_k <- which(indexSet == k)
-      # test min of q_t^jk invisible
+      # test min of q_t^k invisible
       if(eval2D_q_min(costQ, cumy1, cumy2, cumyS, k, t, beta) > eval2D_q(costQ, cumy1, cumy2, cumyS, j, t, beta, t1k, t2k))
       {omega_t[ind_k] <- max(omega_t[ind_k], info$m[i])}
 
@@ -32,7 +32,7 @@ omega_t_fct_1C <- function(t, info, nrows,
       t1j <- eval_mean(cumy1, j, t)
       t2j <- eval_mean(cumy2, j, t)
       ind_j <- which(indexSet == j)
-      #test min of q_t^kj invisible
+      #test min of q_t^j invisible
       if(eval2D_q_min(costQ, cumy1, cumy2, cumyS, j, t, beta) > eval2D_q(costQ, cumy1, cumy2, cumyS, k, t, beta, t1j, t2j))
         {omega_t[ind_j] <- max(omega_t[ind_j], info$m[i])}
     }

@@ -25,19 +25,18 @@ omega_t_Reg_fct_1C <- function(t, info, nrows,
       t1k <- tk$x
       t2k <- tk$y
       ind_k <- which(indexSet == k)
-      # test min of q_t^jk invisible
-      if(evalReg_q_min(costQ, cumX, cumY, cumXY, cumSX, cumSY, k, t, beta) > evalReg_q(costQ, cumX, cumY, cumXY, cumSX, cumSY, k, t, beta, t1k, t2k))
-      {omega_t[ind_k] <- max(omega_t[ind_k], info$m[i])}
+      # test min of q_t^k invisible
+      if(evalReg_q_min2(costQ, cumX, cumY, cumXY, cumSX, cumSY, k, t, beta) > evalReg_q(costQ, cumX, cumY, cumXY, cumSX, cumSY, j, t, beta, t1k, t2k))
+        {omega_t[ind_k] <- max(omega_t[ind_k], info$m[i])}
 
       #computing argmin of quadratics q_t^j (t1j,t2j)
-      coeff <- ellipseCenter(ellipseCoeff(costQ, cumX, cumY, cumXY, cumSX, cumSY, j, t, beta))
-      tj <- ellipseCenter(coeff)
+      tj <- ellipseCenter(ellipseCoeff(costQ, cumX, cumY, cumXY, cumSX, cumSY, j, t, beta))
       t1j <- tj$x
       t2j <- tj$y
       ind_j <- which(indexSet == j)
-      #test min of q_t^kj invisible
-      if(evalReg_q_min(costQ, cumX, cumY, cumXY, cumSX, cumSY, k, t, beta) > evalReg_q(costQ, cumX, cumY, cumXY, cumSX, cumSY, k, t, beta, t1j, t2j))
-      {omega_t[ind_j] <- max(omega_t[ind_j], info$m[i])}
+      #test min of q_t^j invisible
+      if(evalReg_q_min2(costQ, cumX, cumY, cumXY, cumSX, cumSY, j, t, beta) > evalReg_q(costQ, cumX, cumY, cumXY, cumSX, cumSY, k, t, beta, t1j, t2j))
+        {omega_t[ind_j] <- max(omega_t[ind_j], info$m[i])}
     }
   }
   return(omega_t)
