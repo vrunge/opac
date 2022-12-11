@@ -5,6 +5,8 @@
 #############################################
 #############################################
 
+
+
 ellipseCoeff <- function(costQ, cumX, cumY, cumXY, cumSX, cumSY, k, t, beta)
 {
   A <- (t - k + 1) * eval_mean(cumSX, k, t)
@@ -15,20 +17,6 @@ ellipseCoeff <- function(costQ, cumX, cumY, cumXY, cumSX, cumSY, k, t, beta)
   G <- (t - k + 1) * eval_mean(cumSY, k, t) + costQ[shift(k-1)] + beta
 
   return(c(A,B,C,D,E,G))
-}
-
-#############################################
-
-ellipseEval <- function(coeff, t1, t2)
-{
-  A <- coeff[1]
-  B <- coeff[2]
-  C <- coeff[3]
-  D <- coeff[4]
-  E <- coeff[5]
-  G <- coeff[6]
-  eval <- A*t1^2 + 2*B*t1*t2 + C*t2^2 + 2*D*t1 + 2*E*t2 + G
-  return(eval)
 }
 
 #############################################
@@ -58,7 +46,7 @@ evalReg_q_min <- function(costQ, cumX, cumY, cumXY, cumSX, cumSY, k, t, beta) ##
 
 evalReg_q_min2 <- function(costQ, cumX, cumY, cumXY, cumSX, cumSY, k, t, beta) ### minimum of q_{t}^{k}, data y_{k} to y_{t}
 {
-  if(t == k){return(costQ[shift(k-1)] + beta)}
+  if(t == k){return(costQ[shift(k-1)] + beta)} #### ATTENTION
   t1 <- (eval_mean(cumXY, k, t) - eval_mean(cumX, k, t)*eval_mean(cumY, k, t))/(eval_mean(cumSX, k, t) - (eval_mean(cumX, k, t))^2)
   t2 <- (eval_mean(cumSX, k, t)*eval_mean(cumY, k, t) - eval_mean(cumX, k, t)*eval_mean(cumXY, k, t))/(eval_mean(cumSX, k, t) - (eval_mean(cumX, k, t))^2)
   eval <- (t - k + 1) * (eval_mean(cumSX, k, t) * t1^2 + 2 * eval_mean(cumX, k, t)*t1 * t2 + t2^2)
@@ -68,7 +56,7 @@ evalReg_q_min2 <- function(costQ, cumX, cumY, cumXY, cumSX, cumSY, k, t, beta) #
 
 #############################################
 
-evalReg_q <- function(costQ, cumX, cumY, cumXY, cumSX, cumSY, k, t, beta, t1, t2) ### minimum of q_{t}^{k}, data y_{k} to y_{t}
+evalReg_q <- function(costQ, cumX, cumY, cumXY, cumSX, cumSY, k, t, beta, t1, t2) ### value of q_{t}^{k}, data y_{k} to y_{t} at point (t1,t2)
 {
   if(t == k){return(Inf)}
   eval <- (t - k + 1) * (eval_mean(cumSX, k, t) * t1^2 + 2 * eval_mean(cumX, k, t)*t1 * t2 + t2^2)
@@ -76,183 +64,156 @@ evalReg_q <- function(costQ, cumX, cumY, cumXY, cumSX, cumSY, k, t, beta, t1, t2
   return(eval)
 }
 
+
+#############################################
+#############################################
 #############################################
 
 
 evalReg_q_1_min <- function(costQ, cumX, cumY, cumXY, cumSX, cumSY, j, k, t, beta)
 {
-  #print("evalReg_q_1_min")
-  #print(c(j,k,t))
+  ### ### GET COEFF ### ###
+  ### ### GET COEFF ### ###
   coeffj <- ellipseCoeff(costQ, cumX, cumY, cumXY, cumSX, cumSY, j, t, beta)
   coeffk <- ellipseCoeff(costQ, cumX, cumY, cumXY, cumSX, cumSY, k, t, beta)
   coeff1C <- coeffj - coeffk
 
-  center <- ellipseCenter(coeff1C)
 
-  if(ellipseEval(coeff1C, center$x, center$y) > 0){return(Inf)}
+  centerk <- ellipseCenter(coeffk)
 
-  fk <- function(s, type)
-  {
-    branch <- ellipseBranch(coeff1C, s, type = type, ref0 = center$y)
-    return(evalReg_q(costQ, cumX, cumY, cumXY, cumSX, cumSY, k, t, beta, branch$x, branch$y))
-  }
-  fj <- function(s, type)
-  {
-    branch <- ellipseBranch(coeff1C, s, type = type, ref0 = center$y)
-    return(evalReg_q(costQ, cumX, cumY, cumXY, cumSX, cumSY, j, t, beta, branch$x, branch$y))
-  }
+  #print("WHYWHYWHYWHYWHYWHYWHYWHYWHYWHYWHYWHYWHYWHYWHYWHYWHY")
+  #print(centerk)
+  #print(ellipseEval(coeff1C, centerk$x, centerk$y))
+  #print(ellipseEval(coeff1C, centerk$x, centerk$y) > 0)
+  if(ellipseEval(coeff1C, centerk$x, centerk$y) > 0){return(-Inf)}
+  #if(k == t){return(Inf)}
+  #print("WHYWHYWHYWHYWHYWHYWHYWHYWHYWHYWHYWHYWHYWHYWHYWHYWHY")
 
-  # 2 explorations s in [0, 1] left and right
-  # 2 explorations s in [-1, 0] left and right
-  l1k <- golden_Search(fk, 0, 1, "left")
-  l2k <- golden_Search(fk, -1, 0, "left")
-  r1k <- golden_Search(fk, 0, 1, "right")
-  r2k <- golden_Search(fk, -1, 0, "right")
 
-  l1j <- golden_Search(fj, 0, 1, "left")
-  l2j <- golden_Search(fj, -1, 0, "left")
-  r1j <- golden_Search(fj, 0, 1, "right")
-  r2j <- golden_Search(fj, -1, 0, "right")
+  ######################################################################
+  #ell <- points.on.ellipse(coeff1C, 100)
+  #minx <- min(c(ell[,1]))
+  #maxx <- max(c(ell[,1]))
+  #miny <- min(c(ell[,2]))
+  #maxy <- max(c(ell[,2]))
+  #plot(ell, asp = 1,  xlim = c(minx,maxx), ylim = c(miny,maxy))
 
-  M <- c(l1k$m, l2k$m, r1k$m, r2k$m, l1j$m, l2j$m, r1j$m, r2j$m)
-  ind <- which.min(M)
-  #print(ind)
-  m <- M[ind]
-  #s <- c(l1k$s, l2k$s, r1k$s, r2k$s, l1j$s, l2j$s, r1j$s, r2j$s)[ind]
-  #type <- c("left", "left", "right", "right", "left", "left", "right", "right")[ind]
-  return(m)
+  #print(c(j,k,t))
+  #print(coeffk)
+  #coeffk2 <- coeffk
+  #A <- coeffk2[1]
+  #B <- coeffk2[2]
+  #C <- coeffk2[3]
+  #print("uuuuuuuuuuuuuu")
+  #print(A*C - B^2) # > 0
+  #centerk <- ellipseCenter(coeffk2)
+  #print(centerk)
+  #GG <- ellipseEval(coeffk2, centerk$x, centerk$y)
+  #coeffk2[6] <- coeffk2[6] - GG - 5
+  #if(isAnEllipse(coeffk2))
+  #{
+  #  print(coeffk2)
+  #  par(new = TRUE)
+  #  plot(points.on.ellipse(coeffk2, 100), col = 2, asp = 1,  xlim = c(minx,maxx), ylim = c(miny,maxy))
+  #}
+  ######################################################################
+
+
+  ### ### ROTATION MATRIX ### ###
+  ### ### ROTATION MATRIX ### ###
+  temp <- ellipseRotation(coeffk)
+  angle <- temp$angle #rotation MATRIX
+
+
+  ### ### ROTATION ### ###
+  ### ### ROTATION ### ###
+  coeffk <- temp$coeff
+  temp <- ellipseRotation(coeff1C, angle)
+  coeff1C <- temp$coeff
+
+
+  ######################################################################
+  #ell <- points.on.ellipse(coeff1C, 100)
+  #minx <- min(c(ell[,1]))
+  #maxx <- max(c(ell[,1]))
+  #miny <- min(c(ell[,2]))
+  #maxy <- max(c(ell[,2]))
+  #plot(ell, asp = 1,  xlim = c(minx,maxx), ylim = c(miny,maxy))
+
+  #print(c(j,k,t))
+  #print(coeffk)
+  #coeffk2 <- coeffk
+  #A <- coeffk2[1]
+  #B <- coeffk2[2]
+  #C <- coeffk2[3]
+  #print("uuuuuuuuuuuuuu")
+  #print(A*C - B^2) # > 0
+  #centerk <- ellipseCenter(coeffk2)
+  #print(centerk)
+  #GG <- ellipseEval(coeffk2, centerk$x, centerk$y)
+  #coeffk2[6] <- coeffk2[6] - GG - 5
+  #if(isAnEllipse(coeffk2))
+  #{
+  #  print(coeffk2)
+  #  par(new = TRUE)
+  #  plot(points.on.ellipse(coeffk2, 100), col = 2, asp = 1,  xlim = c(minx,maxx), ylim = c(miny,maxy))
+  #}
+  ######################################################################
+
+
+
+  ### ### ALL ANGLES ### ###
+  ### ### ALL ANGLES ### ###
+  centerk <- ellipseCenter(coeffk)
+  angle1 <- ellipseAngleFromConstant(coeff1C, centerk$x, "x")
+  angle2 <- ellipseAngleFromConstant(coeff1C, centerk$y, "y")
+  angles <- sort(c(unlist(angle1), unlist(angle2), c(0, pi/2, pi, 3*pi/2)))
+
+  #print(angle1)
+  #print(angle2)
+
+  ### ### MIN SEARCH between two consecutive angles ### ###
+  ### ### MIN SEARCH between two consecutive angles ### ###
+
+  fk <- function(x) evalReg_q_onConstraint(coeffk, coeff1C, x)
+
+  #print("anglesanglesanglesanglesanglesanglesanglesangles")
+  #print(angles)
+  #print(ellipseEval(coeff1C, centerk$x, centerk$y))
+  #print(ellipseEval(coeff1C, centerk$x, centerk$y) > 0)
+
+  l1k <- golden_Search(fk, angles[1], angles[2])
+  l2k <- golden_Search(fk, angles[2], angles[3])
+  l3k <- golden_Search(fk, angles[3], angles[4])
+  l4k <- golden_Search(fk, angles[4], angles[5])
+  l5k <- golden_Search(fk, angles[5], angles[6])
+  l6k <- golden_Search(fk, angles[6], angles[7])
+  l7k <- golden_Search(fk, angles[7], angles[8])
+  l8k <- golden_Search(fk, angles[8], 2*pi)
+
+  M <- c(l1k$m, l2k$m, l3k$m, l4k$m, l5k$m, l6k$m, l7k$m, l8k$m)
+  return(min(M))
 }
 
+################################################
+################################################
 
-##############################################
-#####
-##### Ax^2 + 2Bxy + Cy^2 + 2Dx + 2Ey + G #####
-#####
-##### s in [-1,1] with y = ref0 obtained at s = 0
-#####
-##############################################
-
-ellipseBranch <- function(coeff, s, type, ref0)
+test <- function(costQ, cumX, cumY, cumXY, cumSX, cumSY, j, k, t, beta)
 {
-  A <- coeff[1]
-  B <- coeff[2]
-  C <- coeff[3]
-  D <- coeff[4]
-  E <- coeff[5]
-  G <- coeff[6]
 
-  ###
-  ### y in ]yMin, yMax[ to have two roots in x (for ellipses)
-  ###
-  u <- B^2 - A*C
-  v <- B*D - A*E
-  w <- v^2 - u*(D^2 - A*G)
+  fk <- function(x) evalReg_q_onConstraint(coeffk, coeff1C, x)
+  fkPrime <- function(x) evalReg_qPrime_onConstraint(coeffk, coeff1C, x)
 
-  if((u > 0) | (w < 0)){return(NULL)}
-  if((s < -1) | (s > 1)){return(NULL)}
 
-  yMin <- (-v-sqrt(w))/u
-  yMax <- (-v+sqrt(w))/u
+  Newton_Raphson(fk, fkPrime, angles[1], angles[2])
 
-  ###
-  ### computing y value
-  ###
-  if(s >= 0){y <- ref0 + s*(yMax - ref0)}
-  if(s < 0){y <- ref0 + s*(ref0 - yMin)}
-  if(abs(s - 1)<10^(-14)){y <- yMax}
-  if(abs(s + 1)<10^(-14)){y <- yMin}
 
-  ###
-  ### computing x value
-  ###
-  z1 <- B*y+D
-  z2 <- z1^2 - A*(C*y^2 + 2*E*y + G)
-  if((z2 < 10^(-13)) | (abs(s - 1)<10^(-14)) | (abs(s + 1)<10^(-14))){x <- -z1/A}
-  else
-  {
-    if(type == "left"){x <- (-z1 - sqrt(z2))/A}
-    if(type == "right"){x <- (-z1 + sqrt(z2))/A}
-  }
-  return(list(x = x, y = y))
 }
 
-#############################################
 
-isAnEllipse <- function(coeff)
-{
-  A <- coeff[1]
-  B <- coeff[2]
-  C <- coeff[3]
-  D <- coeff[4]
-  E <- coeff[5]
-  G <- coeff[6]
 
-  if(abs(G) == Inf){return(FALSE)}
-  u <- B^2 - A*C
-  v <- B*D - A*E
-  w <- v^2 - u*(D^2 - A*G)
-  if((u > -10^(-13)) | (w < 10^(-13))){return(FALSE)}
-  return(TRUE)
-}
 
-#############################################
 
-ellipseCenter <- function(coeff)
-{
-  A <- coeff[1]
-  B <- coeff[2]
-  C <- coeff[3]
-  D <- coeff[4]
-  E <- coeff[5]
-  G <- coeff[6]
-  u <- A*C - B^2 # > 0
 
-  if(abs(u) < 10^(-14)){return(list(x = 0, y = E))} #NULL (one of the minimal points)
-  if(u < 0){return(NULL)} #NULL (one of the minimal points)
-  x <- (B*E - C*D)/u
-  y <- (B*D - A*E)/u
-  return(list(x = x, y = y))
-}
 
-#############################################
-#############################################
-#############################################
-#############################################
-#############################################
 
-golden_Search <- function(f, a, b, type)
-{
-  phi <- 2/(sqrt(5) + 1)
-
-  x1 <- b - phi*(b - a)
-  x2 <- a + phi*(b - a)
-
-  f1 <- f(x1, type)
-  f2 <- f(x2, type)
-
-  if(f1 != Inf)
-  {
-    while (abs(f2 - f1) > 10^(-13))
-    {
-      if (f2 > f1)
-      {
-        b <- x2
-        x2 <- x1
-        f2 <- f1
-        x1 <- b - phi*(b - a)
-        f1 <- f(x1, type)
-      }
-      else
-      {
-        a <- x1
-        x1 <- x2
-        f1 <- f2
-        x2 <- a + phi*(b - a)
-        f2 <- f(x2, type)
-      }
-    }
-  }
-  ind <- which.min(c(f1, f2))
-
-  return(list(s = c(x1, x2)[ind], m = c(f1, f2)[ind]))
-}

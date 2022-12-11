@@ -2,20 +2,18 @@
 % Please edit documentation in R/OP_2D_AC.R
 \name{OP_2D_AC}
 \alias{OP_2D_AC}
-\title{OP_2D_2C}
+\title{OP_2D_AC}
 \usage{
-OP_2D_AC(data, beta = 4 * log(nrow(data)), testMode = 2)
+OP_2D_AC(data, beta = 4 * log(nrow(data)))
 }
 \arguments{
-\item{data}{a dataframe with two components: y1 and y2, time series of same length}
+\item{data}{a data-frame with two components: y1 and y2, time series of same length}
 
 \item{beta}{penalty value}
-
-\item{testMode}{inner pruning test modes (0, 1 or 2)}
 }
 \value{
 a list with the change-point elements (each last index of each segment) and a vector nb counting the number of non-pruned elements at each iteration
 }
 \description{
-Optimal Partitioning algorithm for bivariate independent time series (with OP2C algorithm)
+Optimal Partitioning algorithm for bivariate independent time series (with OPAC algorithm)
 }

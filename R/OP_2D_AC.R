@@ -1,15 +1,14 @@
 
 ###############################################
-#############     OP_2D_2C    #################
+#############     OP_2D_AC    #################
 ###############################################
 
-#' OP_2D_2C
-#' @description Optimal Partitioning algorithm for bivariate independent time series (with OP2C algorithm)
-#' @param data a dataframe with two components: y1 and y2, time series of same length
+#' OP_2D_AC
+#' @description Optimal Partitioning algorithm for bivariate independent time series (with OPAC algorithm)
+#' @param data a data-frame with two components: y1 and y2, time series of same length
 #' @param beta penalty value
-#' @param testMode inner pruning test modes (0, 1 or 2)
 #' @return a list with the change-point elements (each last index of each segment) and a vector nb counting the number of non-pruned elements at each iteration
-OP_2D_AC <- function(data, beta = 4 * log(nrow(data)), testMode = 2)
+OP_2D_AC <- function(data, beta = 4 * log(nrow(data)))
 {
   #########
   ###
@@ -94,8 +93,11 @@ OP_2D_AC <- function(data, beta = 4 * log(nrow(data)), testMode = 2)
     ######### STEP updating info with new data point y_{t+1}
     #########
 
+    #########
+    #########
     ######### 1 ######### updating 3-point already in info
-
+    #########
+    #########
     for(l in 1:nrows[t+1]) # update m with new index (time step) t+1
     {
       k <- info$k[l]
@@ -139,7 +141,7 @@ OP_2D_AC <- function(data, beta = 4 * log(nrow(data)), testMode = 2)
 
     #########
     #########
-    ######### 2 ######### adding new 3-points with t
+    ######### 2 ######### adding new 3-points with t+1
     #########
     #########
 
@@ -148,7 +150,9 @@ OP_2D_AC <- function(data, beta = 4 * log(nrow(data)), testMode = 2)
     temp <- eval2D_q_0(costQ, cumy1, cumy2, cumyS, t+1, t+1, beta)
     info <- rbind(info, c(t+1, NA, NA, temp$m, temp$p[1], temp$p[2], 1)) #update surface later
 
-    ### ### ### new triple intersection point with  t+1 (always on the surface)
+    ### ### ### new triple intersection points with  t+1 (always on the surface)
+    ### ### ### new triple intersection points with  t+1 (always on the surface) CAN BE DONE BETTER...
+    ### ### ### new triple intersection points with  t+1 (always on the surface)
     seen_indices <- NULL
     for(j in indexSet)
     {
@@ -228,9 +232,13 @@ OP_2D_AC <- function(data, beta = 4 * log(nrow(data)), testMode = 2)
     ### add new index t
     indexSet <- c(indexSet, t+1)
 
-    #####
-    ##### UPDATE status SURFACE !!! for all q_0 and q_1
-    #####
+
+    #########
+    #########
+    ######### 3 ######### UPDATE status SURFACE !!! for all q_0 and q_1
+    #########
+    #########
+
     nrows[t+1] <- nrow(info) ### count number of rows in info data-frame
 
     for(l in 1:nrows[t+1])

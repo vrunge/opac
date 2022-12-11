@@ -1,5 +1,64 @@
 
 
+coeff <- c(1,3,10,10,-10,13)
+E1 <- my.ellipse(coeff)
+
+
+newcoeff <- ellipseRotation(coeff)$coeff
+E2 <- my.ellipse(newcoeff)
+
+
+base::plot(E1, col = 1, type = 'l', asp = 1,
+           xlim = c(min(E1[,1],E2[,1]),max(E1[,1],E2[,1])),
+           ylim = c(min(E1[,2],E2[,2]),max(E1[,2],E2[,2])))
+par(new = TRUE)
+base::plot(E2, type = 'l', asp = 1, col = "green",
+           xlim = c(min(E1[,1],E2[,1]),max(E1[,1],E2[,1])),
+           ylim = c(min(E1[,2],E2[,2]),max(E1[,2],E2[,2])))
+
+
+
+
+
+
+
+
+
+#####################
+#####################
+#####################
+#####################
+
+
+centerk <- list(x = mean(min(E1C[,1]),max(E1C[,1])),
+                y = mean(min(E1C[,2]),max(E1C[,2])))
+minEy <- which.min(E1C[,2])
+maxEy <- which.max(E1C[,2])
+
+xBAS <- E1C[minEy,1]
+xHAUT <- E1C[maxEy,1]
+yBAS <- min(E1C[,2])
+yHAUT <- min(E1C[,2])
+
+x <- E1C[,1]
+y <- E1C[,2]
+
+ligne <- (xHAUT - xBAS)*y-((yHAUT - yBAS)*x + yBAS*(xHAUT - xBAS)-(yHAUT - yBAS)*xBAS)
+
+Select1 <- (E1C[,2] <= centerk$y) & (ligne >= 0)
+Select2 <- (E1C[,2] > centerk$y) & (ligne >= 0)
+Select3 <- (E1C[,2] > centerk$y) & (ligne < 0)
+Select4 <- (E1C[,2] <= centerk$y) & (ligne < 0)
+E1C <- rbind(E1C[Select1,], E1C[Select2,], E1C[Select3,], E1C[Select4,])
+
+E1C
+
+cen <- ellipseCenter(coeff)
+cen
+base::plot(E1, col = 1, type = 'l', asp = 1)
+points(cen$x, cen$y, pch = 12)
+
+
 #### #### #### #### #### #### #### #### #### #### #### #### #### ####
 #### #### inscribed and circumscribed circles from Ellipses #### ####
 #### #### #### #### #### #### #### #### #### #### #### #### #### ####

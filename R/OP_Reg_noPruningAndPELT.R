@@ -137,8 +137,6 @@ OP_Reg_PELT <- function(data, beta = 4 * log(nrow(data)))
     nb[t] <- length(indexSet) ### count number of elements
   }
 
-  #print("costQcostQcostQcostQcostQcostQcostQcostQcostQcostQcostQcostQcostQcostQ")
-  #print(costQ)
   ######### DDDDDDDDDDDDDDDDDDDDDD #########
   ###
   ### backtracking step

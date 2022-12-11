@@ -1,16 +1,15 @@
 
-
 ###############################################
-#############     OP_Reg_1C    ################
+#############    OP_Reg_AC    #################
 ###############################################
 
-#' OP_Reg_1C
+#' OP_Reg_AC
 #'
-#' @description Optimal Partitioning algorithm for change in simple regression (with OP1C algorithm)
+#' @description Optimal Partitioning algorithm for change in simple regression (with OPAC algorithm)
 #' @param data a data-frame with two components: x and y, time series of same length
 #' @param beta penalty value
 #' @return a list with the change-point elements (each last index of each segment) and a vector nb counting the number of non-pruned elements at each iteration
-OP_Reg_1C <- function(data, beta = 4 * log(nrow(data)))
+OP_Reg_AC <- function(data, beta = 4 * log(nrow(data)))
 {
   #########
   ###
