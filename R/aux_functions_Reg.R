@@ -195,20 +195,6 @@ evalReg_q_1_min <- function(costQ, cumX, cumY, cumXY, cumSX, cumSY, j, k, t, bet
   return(min(M))
 }
 
-################################################
-################################################
-
-test <- function(costQ, cumX, cumY, cumXY, cumSX, cumSY, j, k, t, beta)
-{
-
-  fk <- function(x) evalReg_q_onConstraint(coeffk, coeff1C, x)
-  fkPrime <- function(x) evalReg_qPrime_onConstraint(coeffk, coeff1C, x)
-
-
-  Newton_Raphson(fk, fkPrime, angles[1], angles[2])
-
-
-}
 
 
 

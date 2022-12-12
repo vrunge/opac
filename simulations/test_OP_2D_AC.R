@@ -11,7 +11,7 @@ while((a==b) & (b ==c))
   (res1 <- OP_2D_PELT(data, beta = be))
   (res2 <- OP_2D_1C(data, beta = be))
   (res3 <- OP_2D_2C(data, beta = be))
-  (res4 <- OP_2D_AC(data, beta = be))
+  (res4 <- OP_2D_AC(data))
   res0$changepoints
   res1$changepoints
   res2$changepoints

@@ -1,15 +1,15 @@
 
 ###############################################
-#############     OP_Reg_1C    ################
+##########     OP_Reg_1C_Approx    ############
 ###############################################
 
-#' OP_Reg_1C
+#' OP_Reg_1C_Approx
 #'
-#' @description Optimal Partitioning algorithm for change in simple regression (with OP1C algorithm)
+#' @description Optimal Partitioning algorithm for change in simple regression (with OP1C algorithm and circle approximation)
 #' @param data a data-frame with two components: x and y, time series of same length
 #' @param beta penalty value
 #' @return a list with the change-point elements (each last index of each segment) and a vector nb counting the number of non-pruned elements at each iteration
-OP_Reg_1C <- function(data, beta = 4 * log(nrow(data)))
+OP_Reg_1C_Approx <- function(data, beta = 4 * log(nrow(data)))
 {
   #########
   ###
@@ -61,9 +61,10 @@ OP_Reg_1C <- function(data, beta = 4 * log(nrow(data)))
 
     ######### 1 ######### find omega_{t}^k
 
-    omega_t <-  omega_t_Reg_fct_1C(t, info, nrows[t],
-                                   indexSet, nb[t],
-                                   costQ, cumX, cumY, cumXY, cumSX, cumSY, beta)
+    omega_t <-  omega_t_Reg_fct_1C_Approx(t, info, nrows[t],
+                                          indexSet, nb[t],
+                                          costQ, cumX, cumY, cumXY, cumSX, cumSY, beta)
+
 
     ######### 2 ######### pruning indexSet (removing pruned indices)
     nonpruned <- NULL
@@ -92,7 +93,7 @@ OP_Reg_1C <- function(data, beta = 4 * log(nrow(data)))
       }
       else
       {
-        info$m[i] <- evalReg_q_1_min(costQ, cumX, cumY, cumXY, cumSX, cumSY, j, k, t+1, beta)
+        info$m[i] <- evalReg_q_1_min_Approx(costQ, cumX, cumY, cumXY, cumSX, cumSY, j, k, t+1, beta)
       }
     }
 

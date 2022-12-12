@@ -9,6 +9,9 @@ beta <- 1*log(nrow(data))
 (res2 <- OP_Reg_PELT(data, beta))
 (res3 <- OP_Reg_1C(data, beta))
 
+(res4 <- OP_Reg_1C_Approx(data, beta))
+
+
 all(res2$changepoints == res3$changepoints)
 
 
